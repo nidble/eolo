@@ -1,0 +1,9 @@
+*
+src/local
+!src/
+!jest.config.js
+!tests/
+!types/
+!tsconfig.json
+!package.json
+!package-lock.json

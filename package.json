@@ -38,6 +38,7 @@
   "dependencies": {
     "@polka/send-type": "^0.5.2",
     "body-parser": "^1.19.0",
+    "multer": "^1.4.2",
     "nanoid": "^3.1.23",
     "pino-http": "^5.5.0",
     "polka": "^0.5.2"

@@ -1,0 +1,43 @@
+version: "3.2"
+services:
+  eolo:
+    container_name: eolo
+    build: .
+    user: "node"
+    ports:
+        - "3000:3000"
+    volumes:
+        - ${PWD}:/home/node/project
+    working_dir: /home/node/project
+    networks:
+      app_net:
+        ipv4_address: 172.16.250.10
+    restart: always
+
+  redis:
+    container_name: redis-container
+    image: "redis:alpine"
+    command: redis-server --requirepass foobarbaz
+    environment:
+      - REDIS_PASSWORD=foobarbaz
+      - REDIS_REPLICATION_MODE=master
+    ports:
+      - "6379:6379"
+    volumes:
+      # save redisearch data to your current working directory
+      - ./redis-data:/data
+    command:
+      # Save if 100 keys are added in every 10 seconds
+      - "--save 10 100"
+      # Set password
+      - "--requirepass foobarbaz"
+
+networks:
+  app_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        -   subnet: 172.16.250.0/24
+volumes:
+  redis-data:

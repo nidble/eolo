@@ -26,6 +26,8 @@ RUN npm run build
 # It will take Js and native files from "builder" stage, and also install the production packages only
 FROM node:14.15-alpine
 
+RUN apk add --no-cache dumb-init
+
 WORKDIR /app
 ENV NODE_ENV=production
 

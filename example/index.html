@@ -8,28 +8,10 @@
 </head>
 
 <body>
-  <div id="captcha"></div>
-  <form id="solution" onsubmit="return false"><input type="text"><button>SUBMIT</button></form>
-  <script>
-    const url = 'http://localhost:3000/v1/captcha'
-    const ajax = (url, method, data = {}) => fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    }).then(resp => resp.json())
-
-    window.addEventListener("load", function(event) {
-      ajax(url, 'PUT').then(({ data: put }) => {
-        const divEl = document.getElementById('captcha')
-        divEl.innerHTML = `<img src="data:image/png;base64, ${put.base64}" alt="Captcha" />`
-        const callback = (ev) => 
-          ajax(`${url}/${put.id}`, 'POST', { solution: ev.target[0].value }).then(post => { 
-            alert(JSON.stringify(post))
-            return false
-        })
-        document.getElementById('solution').addEventListener("submit", callback, false); 
-      })
-    })
-  </script>
+  <form action="http://localhost:3000/api/v1/image" method="post" enctype="multipart/form-data">
+    <input type="file" name="image"/>
+    <input type="text" name="username"/>
+    <button>SUBMIT</button>
+  </form>
 </body>
 </html>

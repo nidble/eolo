@@ -1,6 +1,8 @@
 import app from '../src'
 import request from 'supertest'
 
+jest.mock('ioredis')
+
 describe('Heathcheck Api', () => {
   it('handle response with 200', async () => {
     const result = await request(app.handler).get('/healthz').send()

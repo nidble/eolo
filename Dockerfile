@@ -5,7 +5,7 @@
 # ################
 
 # It will build: dev-dependencies, rust binary, Ts deps and Js
-FROM node:14.15-alpine AS builder
+FROM node:16.3-alpine AS builder
 
 WORKDIR /usr/src/app
 
@@ -29,7 +29,7 @@ RUN npm run build
 # ################# #
 
 # It will take Js and native files from "builder" stage, and also install the production packages only
-FROM node:14.15-alpine
+FROM node:16.3-alpine
 
 RUN apk add --no-cache dumb-init
 

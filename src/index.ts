@@ -3,18 +3,19 @@ import multer from 'multer'
 import Redis from 'ioredis'
 import { json, cors, logger } from './middleware'
 import * as image from './api/v1/image'
+import * as config from './config'
 
 const app: polka.Polka = polka()
 const upload = multer()
 
-// TODO: adding env
 const redisOpts = {
-  port: 6379,
-  host: '127.0.0.1',
-  family: 4,
-  password: 'foobarbaz',
-  db: 0,
+  port: config.REDIS_PORT,
+  host: config.REDIS_HOST,
+  family: config.REDIS_FAMILY,
+  password: config.REDIS_PASSWORD,
+  db: config.REDIS_DB,
 }
+
 const redis = new Redis(redisOpts)
 
 app.use(logger, json, cors)

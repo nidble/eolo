@@ -2,7 +2,7 @@
 .env
 src/local
 !src/
-!jest.config.js
+!jest.config.cjs
 !tests/
 !types/
 !tsconfig.json

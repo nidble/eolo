@@ -12,18 +12,21 @@ const mockFile = {
 const res = { end() {} } as unknown as Response
 
 describe('Image api works', () => {
-  it('save an image for future processing', async () => {
+  it('save and enqueue an image for future processing', async () => {
     const fieldname = 'image'
     const originalname = '42.jpg'
     const req = {
       file: { ...mockFile, fieldname, originalname },
       body: { username: 'client42' },
     } as unknown as Request
-    const mockRedis = { set: mockSet } as unknown as Redis
-    const action = post(mockRedis)
+    const redis = { set: mockSet } as unknown as Redis
+    const mq = { sendMessage: jest.fn() }
+    const action = post(redis, mq)
+    const payload = JSON.stringify({ fieldname, originalname })
 
     await action(req, res)
 
-    expect(mockSet).toHaveBeenCalledWith('prefix.client42', JSON.stringify({ fieldname, originalname }))
+    expect(mockSet).toHaveBeenCalledWith('prefix.client42', payload)
+    expect(mq.sendMessage).toHaveBeenCalledWith(payload)
   })
 })

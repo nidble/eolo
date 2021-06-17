@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "tsc && node -r dotenv/config ./dist/server.js",
+    "start": "tsc && node -r dotenv/config --experimental-specifier-resolution=node ./dist/server.js",
     "lint": "eslint \"*/**/*.ts\" --quiet --fix",
     "format": "prettier --config .prettierrc \"./src/**/*.ts\" --write",
     "test": "jest",

@@ -2,6 +2,7 @@ import app from '../src'
 import request from 'supertest'
 
 jest.mock('ioredis')
+jest.mock('rsmq')
 
 describe('Heathcheck Api', () => {
   it('handle response with 200', async () => {

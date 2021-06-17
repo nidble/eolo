@@ -1,14 +1,14 @@
 version: "3.2"
 services:
-  eolo:
-    container_name: eolo
+  eolo_server:
+    container_name: eolo_server
     build: .
     user: "node"
     env_file:
      - .env
     environment:
      - NODE_ENV=production
-     - REDIS_HOST=redis-container
+     - REDIS_HOST=${REDIS_HOST}
      - REDIS_PASSWORD=${REDIS_PASSWORD}
     ports:
         - "${NODE_PORT}:${NODE_PORT}"
@@ -19,6 +19,27 @@ services:
       app_net:
         ipv4_address: 172.16.250.10
     restart: always
+
+  eolo_worker:
+    container_name: eolo_worker
+    build: .
+    user: "node"
+    env_file:
+     - .env
+    environment:
+     - NODE_ENV=production
+     - REDIS_HOST=${REDIS_HOST}
+     - REDIS_PASSWORD=${REDIS_PASSWORD}
+    command: "node --experimental-specifier-resolution=node ./dist/worker.js"
+    # volumes:
+    #     - ${PWD}:/home/node/project
+    # working_dir: /home/node/project
+    networks:
+      app_net:
+        ipv4_address: 172.16.250.11
+    restart: always
+    depends_on:
+      - redis
 
   redis:
     container_name: redis-container
@@ -39,6 +60,9 @@ services:
       - "--save 10 100"
       # Set password
       - "--requirepass ${REDIS_PASSWORD}"
+    networks:
+      app_net:
+        ipv4_address: 172.16.250.42
 
 networks:
   app_net:

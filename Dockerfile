@@ -47,4 +47,4 @@ EXPOSE 3030
 
 USER node
 
-CMD ["dumb-init", "node", "./dist/server.js"]
+CMD ["dumb-init", "node", "--experimental-specifier-resolution=node", "./dist/server.js"]

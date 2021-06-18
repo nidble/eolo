@@ -11,7 +11,8 @@ export const sendMessage = (rsmq: RedisSMQ, qname: string) => (message: string) 
 }
 
 // popMessage return also empty object as valid :(, so:
-const isValidQueueMessage = (m: {} | RedisSMQ.QueueMessage): m is RedisSMQ.QueueMessage => Object.keys(m).length !== 0
+const isValidQueueMessage = (m: Record<string, never> | RedisSMQ.QueueMessage): m is RedisSMQ.QueueMessage =>
+  Object.keys(m).length !== 0
 
 export const createQueue = (rsmq: RedisSMQ, qname: string) => async () => {
   try {

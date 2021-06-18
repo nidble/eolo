@@ -1,7 +1,7 @@
 import { Level } from 'pino'
 
 export const PORT = process.env.NODE_PORT || 3030
-export const LOG_LEVEL: Level = (process.env.LOG_LEVEL as Level) || 'silent'
+export const LOG_LEVEL: Level = (process.env.LOG_LEVEL as Level) || 'info'
 
 export const REDIS_PREFIX = process.env.REDIS_PREFIX || 'prefix'
 export const REDIS_PORT = Number(process.env.REDIS_PORT) || 6379
@@ -21,3 +21,5 @@ export const redisOpts = {
   db: REDIS_DB,
   ns: 'rsmq',
 }
+
+export const UPLOADS_FOLDER = process.env.UPLOAD_FOLDER || 'uploads/'

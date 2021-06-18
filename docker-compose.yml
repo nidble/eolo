@@ -7,8 +7,8 @@ x-app: &default-app
   - NODE_ENV=production
   - REDIS_HOST=${REDIS_HOST}
   - REDIS_PASSWORD=${REDIS_PASSWORD}
-  # volumes:
-  #     - ${PWD}:/home/node/project
+  volumes:
+    - ${PWD}/${UPLOADS_FOLDER}:/home/eolo/${UPLOADS_FOLDER}
   # working_dir: /home/node/project
   depends_on:
     - redis

@@ -1,10 +1,15 @@
 export interface SuccessPayload extends ResponsePayload {
   type: 'Success'
   data: {
-    id: string
-    message?: string
-    attempts?: number
-    base64?: string
+    fieldname: string
+    originalname: string
+    mimetype: string
+    size: number
+    path: string
+    username: string
+    longitude: number | null
+    latitude: number | null
+    status: string
   }
 }
 

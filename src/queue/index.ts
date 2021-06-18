@@ -1,51 +1,59 @@
 import { setInterval } from 'timers/promises'
 import RedisSMQ from 'rsmq'
+import { Redis } from 'ioredis'
+import { logger, resize } from '../utils'
+import { Job } from '../../types'
 
-export const sendMessage = (rsmq: RedisSMQ, qname: string) => (message: string) => {
+export const enqueue = (rsmq: RedisSMQ, qname: string) => (job: Job) => {
   const payload = {
     qname,
-    message,
-    delay: 2,
+    message: JSON.stringify(job),
+    delay: 2, // TODO: tuning me
   }
   return rsmq.sendMessageAsync(payload)
 }
 
 // popMessage return also empty object as valid :(, so:
 const isValidQueueMessage = (m: Record<string, never> | RedisSMQ.QueueMessage): m is RedisSMQ.QueueMessage =>
-  Object.keys(m).length !== 0
+  m && Object.keys(m).length !== 0
 
 export const createQueue = (rsmq: RedisSMQ, qname: string) => async () => {
   try {
     await rsmq.createQueueAsync({ qname })
   } catch (error) {
     if (error.name !== 'queueExists') {
-      console.error(error)
+      logger.error(error, '[createQueue]: failed')
     } else {
-      console.log('queue exists.. resuming..')
+      logger.info('[createQueue]: queue exists, resuming..')
     }
   }
 }
 
-export const polling = (rsmq: RedisSMQ, qname: string) => async (delay: number, cap: number) => {
+// {"fieldname":"image","originalname":"32178.jpg","mimetype":"image/jpeg","weight":683305,
+// "path":"uploads/cf...ea","username":"pluto","longitude":0,"latitude":0,"status":"ACCEPTED"}
+export const polling = (redis: Redis, rsmq: RedisSMQ, qname: string) => async (delay: number, cap: number) => {
   let i = 0
   for await (const _startTime of setInterval(delay, Date.now())) {
     try {
       const resp = await rsmq.popMessageAsync({ qname })
       if (isValidQueueMessage(resp)) {
-        console.log('received message:', resp.message)
+        const job: Job = JSON.parse(resp.message)
+        await resize(job)
+        // FIXME prefix must be dynamic
+        await redis.zadd(`prefix:filename:${job.username}`, +new Date(), JSON.stringify({}))
       } else {
-        console.log('no available message in queue..')
+        logger.info('[polling]: no available message in queue..')
       }
     } catch (error) {
-      console.error(error)
+      logger.error(error, '[polling]: failed')
     }
     if (cap >= i) break
     i++
   }
 }
 
-export default (rsmq: RedisSMQ, qname: string) => ({
-  sendMessage: sendMessage(rsmq, qname),
+export default (redis: Redis, rsmq: RedisSMQ, qname: string) => ({
+  enqueue: enqueue(rsmq, qname),
   createQueue: createQueue(rsmq, qname),
-  polling: polling(rsmq, qname),
+  polling: polling(redis, rsmq, qname),
 })

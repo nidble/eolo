@@ -1,16 +1,22 @@
 import RedisSMQ from 'rsmq'
-import queue, { sendMessage, createQueue, polling } from '.'
+import { Redis } from 'ioredis'
+import queue, { enqueue, createQueue, polling } from '.'
+import { Job } from '../../types'
 
 const qname = '42'
 
 describe('Queue factory', () => {
-  it('sendMessage works', async () => {
-    const message = 'queue works'
+  it('enqueue works', async () => {
+    const message = { question: 42 } as unknown as Job
     const redisSMQ = { sendMessageAsync: jest.fn() } as unknown as RedisSMQ
-    const method = sendMessage(redisSMQ, qname)
+    const method = enqueue(redisSMQ, qname)
     await method(message)
 
-    expect(redisSMQ.sendMessageAsync).toHaveBeenCalledWith({ delay: expect.any(Number), message, qname })
+    expect(redisSMQ.sendMessageAsync).toHaveBeenCalledWith({
+      delay: expect.any(Number),
+      message: JSON.stringify(message),
+      qname,
+    })
   })
 
   it('createQueue works', async () => {
@@ -24,7 +30,9 @@ describe('Queue factory', () => {
   it('polling works', async () => {
     const callback = jest.fn()
     const redisSMQ = { popMessageAsync: callback } as unknown as RedisSMQ
-    const method = polling(redisSMQ, qname)
+
+    const r = {} as unknown as Redis
+    const method = polling(r, redisSMQ, qname)
     await method(500, 1)
 
     expect(callback).toBeCalled()
@@ -33,9 +41,10 @@ describe('Queue factory', () => {
 
   it('initialize correctly', () => {
     const redisSMQ = jest.fn() as unknown as RedisSMQ
-    const q = queue(redisSMQ, qname)
+    const r = {} as unknown as Redis
+    const q = queue(r, redisSMQ, qname)
     expect(q).toMatchObject({
-      sendMessage: expect.anything(),
+      enqueue: expect.anything(),
       createQueue: expect.anything(),
       polling: expect.anything(),
     })

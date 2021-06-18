@@ -1,16 +1,22 @@
+export interface Instant {
+  originalname: string
+  username: string
+  weight: number
+  latitude: number | null
+  longitude: number | null
+  // timestamp
+}
+
+interface Job extends Instant {
+  fieldname: string
+  mimetype: string
+  path: string
+  status: string
+}
+
 export interface SuccessPayload extends ResponsePayload {
   type: 'Success'
-  data: {
-    fieldname: string
-    originalname: string
-    mimetype: string
-    size: number
-    path: string
-    username: string
-    longitude: number | null
-    latitude: number | null
-    status: string
-  }
+  data: Job
 }
 
 export interface ErrorPayload extends ResponsePayload {

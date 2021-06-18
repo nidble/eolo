@@ -12,12 +12,12 @@ const upload = multer({ dest: UPLOADS_FOLDER })
 
 const redis = new Redis(redisOpts)
 const rsmq = new RedisSMQ(redisOpts)
-const mq = queue(rsmq, QNAME)
+const q = queue(redis, rsmq, QNAME)
 
 app.use(logger, json, cors)
 
 app.get('healthz', (_req, res) => res.end())
 
-app.post('/api/v1/image', upload.single('image'), image.post(redis, mq))
+app.post('/api/v1/image', upload.single('image'), image.post(q))
 
 export default app

@@ -1,5 +1,7 @@
-import sharp from 'sharp'
+import crypto from 'crypto'
+
 import fs from 'fs/promises'
+import sharp from 'sharp'
 import pino from 'pino'
 import { LOG_LEVEL, UPLOADS_FOLDER } from '../config'
 import { Job } from '../../types'
@@ -25,3 +27,7 @@ export const createFolder = async () => {
     logger.error(err, '[createFolder] failed')
   }
 }
+
+export const md5 = (s: string) => crypto.createHash('md5').update(s).digest('hex')
+
+export const time = () => +new Date()

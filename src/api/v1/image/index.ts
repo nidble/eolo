@@ -1,5 +1,5 @@
 import send from '@polka/send-type'
-import { logger } from '../../../utils'
+import { time, logger, md5 } from '../../../utils'
 import { Request, Response } from 'express'
 import { Job, ResponsePayload } from '../../../../types'
 
@@ -28,7 +28,7 @@ export const post = (queue: { enqueue: Dispatch }) => async (req: Request, res: 
     }
     if (!mimetype || !ALLOWED_MIMETYPES.includes(mimetype)) {
       const error = {
-        message: `mimetype is not supported, accepted only: ${ALLOWED_MIMETYPES.join(';')}`,
+        message: `mimetype not supported, accepted only: ${ALLOWED_MIMETYPES.join(';')}`,
       }
       return response(res, { type: 'Error', errors: [error] }, 422)
     }
@@ -39,9 +39,10 @@ export const post = (queue: { enqueue: Dispatch }) => async (req: Request, res: 
       mimetype,
       weight,
       path,
-      username,
+      username: md5(username),
       longitude: Number(longitude) || null,
       latitude: Number(latitude) || null,
+      timestamp: time(),
       status: 'ACCEPTED',
     }
     await queue.enqueue(payload)

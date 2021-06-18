@@ -4,7 +4,7 @@ export interface Instant {
   weight: number
   latitude: number | null
   longitude: number | null
-  // timestamp
+  timestamp: number
 }
 
 interface Job extends Instant {

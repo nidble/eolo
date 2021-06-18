@@ -3,6 +3,7 @@ import RedisSMQ from 'rsmq'
 import { Redis } from 'ioredis'
 import { logger, resize } from '../utils'
 import { Job } from '../../types'
+import { REDIS_PREFIX } from '../config'
 
 export const enqueue = (rsmq: RedisSMQ, qname: string) => (job: Job) => {
   const payload = {
@@ -39,8 +40,13 @@ export const polling = (redis: Redis, rsmq: RedisSMQ, qname: string) => async (d
       if (isValidQueueMessage(resp)) {
         const job: Job = JSON.parse(resp.message)
         await resize(job)
-        // FIXME prefix must be dynamic
-        await redis.zadd(`prefix:filename:${job.username}`, +new Date(), JSON.stringify({}))
+        const { originalname, username, weight, latitude, longitude, timestamp } = job
+
+        await redis.zadd(
+          `${REDIS_PREFIX}:instant:${job.username}`,
+          timestamp,
+          JSON.stringify({ originalname, username, weight, latitude, longitude, timestamp }),
+        )
         logger.info(job, '[polling]: job successfully processed, ready to start new one..')
       } else {
         logger.info('[polling]: no available message in queue..')

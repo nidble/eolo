@@ -1,5 +1,11 @@
 import { Request, Response } from 'express'
 import { post } from '.'
+import { md5 } from '../../../utils'
+
+jest.mock('../../../utils', () => ({
+  ...jest.requireActual('../../../utils'),
+  time: () => 1234567890,
+}))
 
 // const mockSet = jest.fn()
 const resMock = () => ({ end: jest.fn(), getHeader: jest.fn(), writeHead: jest.fn() } as unknown as Response)
@@ -24,7 +30,7 @@ describe('Image api works', () => {
     const action = post(mq)
 
     await action(req, res)
-    const payload = { type: 'Error', errors: [{ message: 'mimetype not supported, please upload only: image/jpeg' }] }
+    const payload = { type: 'Error', errors: [{ message: 'mimetype not supported, accepted only: image/jpeg' }] }
     expect(res.end).toHaveBeenCalledWith(JSON.stringify(payload))
   })
 
@@ -45,9 +51,10 @@ describe('Image api works', () => {
       mimetype: 'image/jpeg',
       weight: 42,
       path: 'baz',
-      username: 'client42',
+      username: md5('client42'),
       longitude: 10,
       latitude: 32,
+      timestamp: 1234567890,
       status: 'ACCEPTED',
     }
     const payload = { type: 'Success', data }
@@ -72,9 +79,10 @@ describe('Image api works', () => {
       mimetype: 'image/jpeg',
       weight: 42,
       path: 'baz',
-      username: 'client42',
+      username: md5('client42'),
       longitude: null,
       latitude: null,
+      timestamp: 1234567890,
       status: 'ACCEPTED',
     }
     const payload = { type: 'Success', data }

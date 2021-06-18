@@ -23,12 +23,12 @@ export const post = (queue: { enqueue: Dispatch }) => async (req: Request, res: 
     }
     const { fieldname, originalname, mimetype, size: weight, path } = req.file ?? {}
     if (!fieldname || !originalname || !weight || !path) {
-      const error = { message: 'your image is invalid or broken' }
+      const error = { message: 'uploaded image is invalid or broken' }
       return response(res, { type: 'Error', errors: [error] }, 422)
     }
-    if (!ALLOWED_MIMETYPES.includes(mimetype)) {
+    if (!mimetype || !ALLOWED_MIMETYPES.includes(mimetype)) {
       const error = {
-        message: `mimetype not supported, please upload only: ${ALLOWED_MIMETYPES.join(';')}`,
+        message: `mimetype is not supported, accepted only: ${ALLOWED_MIMETYPES.join(';')}`,
       }
       return response(res, { type: 'Error', errors: [error] }, 422)
     }

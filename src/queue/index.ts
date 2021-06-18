@@ -41,6 +41,7 @@ export const polling = (redis: Redis, rsmq: RedisSMQ, qname: string) => async (d
         await resize(job)
         // FIXME prefix must be dynamic
         await redis.zadd(`prefix:filename:${job.username}`, +new Date(), JSON.stringify({}))
+        logger.info(job, '[polling]: job successfully processed, ready to start new one..')
       } else {
         logger.info('[polling]: no available message in queue..')
       }

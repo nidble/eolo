@@ -1,9 +1,8 @@
 import { setInterval } from 'timers/promises'
 import RedisSMQ from 'rsmq'
 import { Redis } from 'ioredis'
-import { logger, resize } from '../utils'
+import { key, logger, resize } from '../utils'
 import { Job } from '../../types'
-import { REDIS_PREFIX } from '../config'
 
 export const enqueue = (rsmq: RedisSMQ, qname: string) => (job: Job) => {
   const payload = {
@@ -43,7 +42,7 @@ export const polling = (redis: Redis, rsmq: RedisSMQ, qname: string) => async (d
         const { originalname, username, weight, latitude, longitude, timestamp } = job
 
         await redis.zadd(
-          `${REDIS_PREFIX}:instant:${job.username}`,
+          key(job.username),
           timestamp,
           JSON.stringify({ originalname, username, weight, latitude, longitude, timestamp }),
         )

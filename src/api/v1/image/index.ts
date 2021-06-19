@@ -1,7 +1,8 @@
 import send from '@polka/send-type'
-import { time, logger, md5 } from '../../../utils'
+import { time, logger, key } from '../../../utils'
 import { Request, Response } from 'express'
 import { Job, ResponsePayload } from '../../../../types'
+import { Redis } from 'ioredis'
 
 type Dispatch = (j: Job) => Promise<string>
 
@@ -35,7 +36,7 @@ const extractJob = (req: Request): ResponsePayload => {
       mimetype,
       weight,
       path,
-      username: md5(username),
+      username,
       longitude: Number(longitude) || null,
       latitude: Number(latitude) || null,
       timestamp: time(),
@@ -44,10 +45,6 @@ const extractJob = (req: Request): ResponsePayload => {
   }
 }
 
-/*
-fieldname: 'image', originalname: '32178.jpg', mimetype: 'image/jpeg', destination: 'uploads/',
-filename: '48fafda...743', path: 'uploads/48fafda...743', size: 683305
-*/
 const ALLOWED_MIMETYPES = ['image/jpeg']
 export const post = (queue: { enqueue: Dispatch }) => async (req: Request, res: Response) => {
   try {
@@ -64,4 +61,15 @@ export const post = (queue: { enqueue: Dispatch }) => async (req: Request, res: 
     // TODO: maybe choose different error verbosity between production and dev (generic vs detailed)
     response(res, { type: 'Error', errors: [{ message: e.message }] }, 500)
   }
+}
+
+export const index = (redis: Redis) => async (req: Request, res: Response) => {
+  const { username } = req.params
+  if ('' === username.trim()) {
+    const error = { message: 'username not valid', field: 'username' }
+    return response(res, { type: 'Error', errors: [error] }, 200)
+  }
+
+  const instants = await redis.zrange(key(username), 0, 100)
+  response(res, { type: 'Success', data: instants.map((i) => JSON.parse(i)) }, 200)
 }

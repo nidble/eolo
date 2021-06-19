@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
-import { post } from '.'
-import { md5 } from '../../../utils'
+import { Redis } from 'ioredis'
+import { post, index } from '.'
+import { mocked } from 'ts-jest'
 
 jest.mock('../../../utils', () => ({
   ...jest.requireActual('../../../utils'),
@@ -11,7 +12,7 @@ jest.mock('../../../utils', () => ({
 const resMock = () => ({ end: jest.fn(), getHeader: jest.fn(), writeHead: jest.fn() } as unknown as Response)
 const baseFile = { originalname: 'bar', path: 'baz', fieldname: 'foo', size: 42 }
 
-describe('Image api works', () => {
+describe('Image Api [New]', () => {
   it('return error if no username is specified', async () => {
     const req = { file: {} } as unknown as Request
     const res = resMock()
@@ -51,7 +52,7 @@ describe('Image api works', () => {
       mimetype: 'image/jpeg',
       weight: 42,
       path: 'baz',
-      username: md5('client42'),
+      username: 'client42',
       longitude: 10,
       latitude: 32,
       timestamp: 1234567890,
@@ -79,7 +80,7 @@ describe('Image api works', () => {
       mimetype: 'image/jpeg',
       weight: 42,
       path: 'baz',
-      username: md5('client42'),
+      username: 'client42',
       longitude: null,
       latitude: null,
       timestamp: 1234567890,
@@ -88,5 +89,49 @@ describe('Image api works', () => {
     const payload = { type: 'Success', data }
     expect(res.end).toHaveBeenCalledWith(JSON.stringify(payload))
     expect(mq.enqueue).toHaveBeenCalledWith(data)
+  })
+})
+
+describe('Image Api [Listing]', () => {
+  it('require an username param', async () => {
+    const redis = {} as unknown as Redis
+    const req = { params: { username: ' ' } } as unknown as Request
+    const res = resMock()
+    const action = index(redis)
+
+    await action(req, res)
+    const error = { message: 'username not valid', field: 'username' }
+    const payload = { type: 'Error', errors: [error] }
+    expect(res.end).toHaveBeenCalledWith(JSON.stringify(payload))
+  })
+
+  it('return a list of instants', async () => {
+    const stub = [
+      {
+        originalname: '32178.jpg',
+        username: 'pluto',
+        weight: 683305,
+        latitude: null,
+        longitude: null,
+        timestamp: 1624105228293,
+      },
+      {
+        originalname: '32179.jpg',
+        username: 'pluto',
+        weight: 683305,
+        latitude: null,
+        longitude: null,
+        timestamp: 1624105232377,
+      },
+    ]
+
+    const redis = { zrange: jest.fn().mockResolvedValue(stub.map((i) => JSON.stringify(i))) } as unknown as Redis
+    const req = { params: { username: 'pippo' } } as unknown as Request
+    const res = resMock()
+    const action = index(redis)
+
+    await action(req, res)
+    const payload = { type: 'Success', data: stub }
+    expect(res.end).toHaveBeenCalledWith(JSON.stringify(payload))
   })
 })

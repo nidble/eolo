@@ -14,9 +14,9 @@ interface Job extends Instant {
   status: string
 }
 
-export interface SuccessPayload extends ResponsePayload {
+export interface SuccessPayload<T extends Job | Instant> extends ResponsePayload {
   type: 'Success'
-  data: Job
+  data: T
 }
 
 export interface ErrorPayload extends ResponsePayload {

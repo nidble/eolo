@@ -20,4 +20,6 @@ app.get('healthz', (_req, res) => res.end())
 
 app.post('/api/v1/image', upload.single('image'), image.post(q))
 
+app.get('/api/v1/image/:username/', image.index(redis))
+
 export default app

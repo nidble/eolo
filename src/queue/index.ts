@@ -1,8 +1,9 @@
 import { setInterval } from 'timers/promises'
 import RedisSMQ from 'rsmq'
 import { Redis } from 'ioredis'
-import { getImageName, key, logger, resize } from '../utils'
+import { logger } from '../utils'
 import { Job } from '../../types'
+import { process } from './helper'
 
 export const enqueue = (rsmq: RedisSMQ, qname: string) => (job: Job) => {
   const payload = {
@@ -12,10 +13,6 @@ export const enqueue = (rsmq: RedisSMQ, qname: string) => (job: Job) => {
   }
   return rsmq.sendMessageAsync(payload)
 }
-
-// popMessage return also empty object as valid :(, so:
-const isValidQueueMessage = (m: Record<string, never> | RedisSMQ.QueueMessage): m is RedisSMQ.QueueMessage =>
-  m && Object.keys(m).length !== 0
 
 export const createQueue = (rsmq: RedisSMQ, qname: string) => async () => {
   try {
@@ -29,27 +26,12 @@ export const createQueue = (rsmq: RedisSMQ, qname: string) => async () => {
   }
 }
 
-// {"fieldname":"image","originalname":"32178.jpg","mimetype":"image/jpeg","weight":683305,
-// "path":"uploads/cf...ea","username":"pluto","longitude":0,"latitude":0,"status":"ACCEPTED"}
 export const polling = (redis: Redis, rsmq: RedisSMQ, qname: string) => async (delay: number, cap: number) => {
   let i = 0
-  for await (const _startTime of setInterval(delay, Date.now())) {
+  for await (const startTimeIgnored of setInterval(delay, Date.now())) {
     try {
       const resp = await rsmq.popMessageAsync({ qname })
-      if (isValidQueueMessage(resp)) {
-        const job: Job = JSON.parse(resp.message)
-        await resize(job)
-        const { originalname, username, weight, latitude, longitude, timestamp } = job
-
-        await redis.zadd(
-          key(job.username),
-          timestamp,
-          JSON.stringify({ name: getImageName(originalname), username, weight, latitude, longitude, timestamp }),
-        )
-        logger.info(job, '[polling]: job successfully processed, ready to start new one..')
-      } else {
-        logger.info('[polling]: no available message in queue..')
-      }
+      await process(resp, redis)
     } catch (error) {
       logger.error(error, '[polling]: failed')
     }

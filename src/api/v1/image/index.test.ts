@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
 import { Redis } from 'ioredis'
 import { post, index } from '.'
-import { mocked } from 'ts-jest'
 
 jest.mock('../../../utils', () => ({
   ...jest.requireActual('../../../utils'),

@@ -127,7 +127,7 @@
       "smart"
     ],
     "no-unreachable": "error",
-    "consistent-return": "error",
+    "consistent-return": "off",
     "no-return-await": "error",
     "no-mixed-operators": "error",
     "no-nested-ternary": "error",
@@ -166,7 +166,8 @@
     "@typescript-eslint/no-unused-vars": [
       "error",
       {
-        "argsIgnorePattern": "^_"
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "[iI]gnored"
       }
     ],
     "@typescript-eslint/no-floating-promises": [

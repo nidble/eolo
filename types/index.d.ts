@@ -15,12 +15,12 @@ interface Job extends Omit<Instant, 'name'> {
   status: string
 }
 
-export interface SuccessPayload<T extends Job | Instant> extends ResponsePayload {
+export interface SuccessPayload<T> {
   type: 'Success'
   data: T
 }
 
-export interface ErrorPayload extends ResponsePayload {
+export interface ErrorPayload {
   type: 'Error'
   errors: Array<{
     message: string
@@ -28,4 +28,4 @@ export interface ErrorPayload extends ResponsePayload {
   }>
 }
 
-export type ResponsePayload = SuccessPayload | ErrorPayload
+export type ResponsePayload<T> = SuccessPayload<T> | ErrorPayload

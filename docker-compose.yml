@@ -9,7 +9,6 @@ x-app: &default-app
   - REDIS_PASSWORD=${REDIS_PASSWORD}
   volumes:
     - ${PWD}/${UPLOADS_FOLDER}:/app/${UPLOADS_FOLDER}
-  # working_dir: /home/node/project
   depends_on:
     - redis
 
@@ -43,16 +42,6 @@ services:
       - "--save 10 100"
       # Set password
       - "--requirepass ${REDIS_PASSWORD}"
-    # networks:
-    #   app_net:
-    #     ipv4_address: 172.16.250.42
 
-# networks:
-#   app_net:
-#     driver: bridge
-#     ipam:
-#       driver: default
-#       config:
-#         -   subnet: 172.16.250.0/24
 volumes:
   redis-data:

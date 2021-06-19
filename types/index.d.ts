@@ -29,3 +29,6 @@ export interface ErrorPayload {
 }
 
 export type ResponsePayload<T> = SuccessPayload<T> | ErrorPayload
+
+export type Dispatch = (j: Job) => Promise<string>
+export type Queue = { enqueue: Dispatch }

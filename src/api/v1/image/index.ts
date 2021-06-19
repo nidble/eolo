@@ -1,12 +1,9 @@
 import send from '@polka/send-type'
 import { logger, key } from '../../../utils'
 import { Request, Response } from 'express'
-import { Job, ResponsePayload } from '../../../../types'
+import { Queue, ResponsePayload } from '../../../../types'
 import { Redis } from 'ioredis'
 import { indexValidator, postValidator } from './validator'
-
-type Dispatch = (j: Job) => Promise<string>
-type Queue = { enqueue: Dispatch }
 
 const response = <T>(res: Response, payload: ResponsePayload<T>, httpStatus = 200, headers = {}) => {
   send(res, httpStatus, payload, headers)
@@ -19,7 +16,7 @@ export const post = (queue: Queue) => async (req: Request, res: Response) => {
       return response(res, item, 422)
     }
     await queue.enqueue(item.data)
-    response(res, item, 202) // accepted
+    response(res, item, 202) // TODO: restrict info sent to client
   } catch (e) {
     logger.error(e)
     // TODO: maybe choose different error verbosity between production and dev (generic vs detailed)

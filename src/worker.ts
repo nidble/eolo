@@ -8,7 +8,6 @@ const redis = new Redis(redisOpts)
 const rsmq = new RedisSMQ(redisOpts)
 const q = queue(redis, rsmq, QNAME)
 
-// TODO remember chmod 777 uploads
 await createFolder()
 
 await q.createQueue()

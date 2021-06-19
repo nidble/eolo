@@ -1,5 +1,5 @@
 export interface Instant {
-  originalname: string
+  name: string
   username: string
   weight: number
   latitude: number | null
@@ -7,7 +7,8 @@ export interface Instant {
   timestamp: number
 }
 
-interface Job extends Instant {
+interface Job extends Omit<Instant, 'name'> {
+  originalname: string
   fieldname: string
   mimetype: string
   path: string

@@ -108,7 +108,7 @@ describe('Image Api [Listing]', () => {
   it('return a list of instants', async () => {
     const stub = [
       {
-        originalname: '32178.jpg',
+        name: '/a/b/32178.jpg',
         username: 'pluto',
         weight: 683305,
         latitude: null,
@@ -116,7 +116,7 @@ describe('Image Api [Listing]', () => {
         timestamp: 1624105228293,
       },
       {
-        originalname: '32179.jpg',
+        name: '/a/b/32179.jpg',
         username: 'pluto',
         weight: 683305,
         latitude: null,

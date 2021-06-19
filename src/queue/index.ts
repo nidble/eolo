@@ -1,7 +1,7 @@
 import { setInterval } from 'timers/promises'
 import RedisSMQ from 'rsmq'
 import { Redis } from 'ioredis'
-import { key, logger, resize } from '../utils'
+import { getImageName, key, logger, resize } from '../utils'
 import { Job } from '../../types'
 
 export const enqueue = (rsmq: RedisSMQ, qname: string) => (job: Job) => {
@@ -44,7 +44,7 @@ export const polling = (redis: Redis, rsmq: RedisSMQ, qname: string) => async (d
         await redis.zadd(
           key(job.username),
           timestamp,
-          JSON.stringify({ originalname, username, weight, latitude, longitude, timestamp }),
+          JSON.stringify({ name: getImageName(originalname), username, weight, latitude, longitude, timestamp }),
         )
         logger.info(job, '[polling]: job successfully processed, ready to start new one..')
       } else {

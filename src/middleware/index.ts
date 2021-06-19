@@ -1,10 +1,19 @@
 import polka from 'polka'
 import bodyParser from 'body-parser'
 import pino from 'pino-http'
-import { LOG_LEVEL } from '../config'
+import { LOG_LEVEL, UPLOADS_FOLDER } from '../config'
+import multer from 'multer'
+
+const upload = multer({ dest: UPLOADS_FOLDER })
 
 export const logger = pino({ useLevel: LOG_LEVEL })
 
+/**
+ * Middleware to handle preflight and CORS
+ * @param req
+ * @param res
+ * @param next
+ */
 export const cors: polka.Middleware = (req, res, next) => {
   // TODO:
   // restrict CORS headers to best fit project needs
@@ -21,4 +30,25 @@ export const cors: polka.Middleware = (req, res, next) => {
   next()
 }
 
+/**
+ * Middleware to handle Json body requests
+ * @param req
+ * @param res
+ * @param next
+ */
 export const json = bodyParser.json()
+
+/**
+ * Middleware to proxy Multer, to gracefully return 500 instead to stop server execution
+ * @param req
+ * @param res
+ * @param next
+ */
+export const uploader: polka.Middleware = (req, res, next) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) {
+      return next(err.message)
+    }
+    next()
+  })
+}

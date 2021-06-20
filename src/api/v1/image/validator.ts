@@ -4,7 +4,7 @@ import { Job, ResponsePayload } from '../../../../types'
 
 const ALLOWED_MIMETYPES = ['image/jpeg']
 
-export const postValidator = (req: Request): ResponsePayload<Job> => {
+export const postValidatorLegacy = (req: Request): ResponsePayload<Job> => {
   const { username = '', latitude, longitude } = req.body ?? {}
   if ('' === username) {
     const error = { message: 'username field is mandatory', field: 'username' }

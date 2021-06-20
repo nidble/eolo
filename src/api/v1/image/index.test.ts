@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 import { Request, Response } from 'express'
 import { Redis } from 'ioredis'
 import { post, index } from '.'
@@ -13,24 +14,53 @@ const baseFile = { originalname: 'bar', path: 'baz', fieldname: 'foo', size: 42 
 
 describe('Image Api [New]', () => {
   it('return error if no username is specified', async () => {
-    const req = { file: {} } as unknown as Request
+    const req = { file: {}, body: {} } as unknown as Request
     const res = resMock()
     const mq = { enqueue: jest.fn() }
     const action = post(mq)
 
     await action(req, res)
-    const payload = { type: 'Error', errors: [{ message: 'username field is mandatory', field: 'username' }] }
+    const payload = {
+      type: 'Error',
+      errors: [
+        { message: "required property 'username' as 'undefined' is not valid, should be string", field: 'username' },
+      ],
+    }
     expect(res.end).toHaveBeenCalledWith(JSON.stringify(payload))
   })
 
-  it('return error if uploaded file has an invalid mimetype', async () => {
-    const req = { file: baseFile, body: { username: 'client42' } } as unknown as Request
+  it('return error if uploaded file has an invalid field', async () => {
+    const req = {
+      file: { fieldname: 'foo', size: 42 },
+      body: { username: 'client42' },
+    } as unknown as Request
     const res = resMock()
     const mq = { enqueue: jest.fn() }
     const action = post(mq)
 
     await action(req, res)
-    const payload = { type: 'Error', errors: [{ message: 'mimetype not supported, accepted only: image/jpeg' }] }
+    const message1 = "required property 'originalname' as 'undefined' is not valid, should be string"
+    const message2 = "required property 'mimetype' as 'undefined' is not valid, should be string"
+    const message3 = "required property 'path' as 'undefined' is not valid, should be string"
+    const payload = {
+      type: 'Error',
+      errors: [
+        { message: message1, field: 'image' },
+        { message: message2, field: 'image' },
+        { message: message3, field: 'image' },
+      ],
+    }
+    expect(res.end).toHaveBeenCalledWith(JSON.stringify(payload))
+  })
+  it('return error if uploaded file has an invalid mimetype', async () => {
+    const req = { file: { ...baseFile, mimetype: '' }, body: { username: 'client42' } } as unknown as Request
+    const res = resMock()
+    const mq = { enqueue: jest.fn() }
+    const action = post(mq)
+
+    await action(req, res)
+    const message = "required property 'mimetype' as '' is not valid, should be image/jpeg"
+    const payload = { type: 'Error', errors: [{ message, field: 'image' }] }
     expect(res.end).toHaveBeenCalledWith(JSON.stringify(payload))
   })
 
@@ -46,14 +76,14 @@ describe('Image Api [New]', () => {
     await action(req, res)
 
     const data = {
+      latitude: 32,
+      longitude: 10,
+      username: 'client42',
       fieldname: 'foo',
       originalname: 'bar',
       mimetype: 'image/jpeg',
-      weight: 42,
       path: 'baz',
-      username: 'client42',
-      longitude: 10,
-      latitude: 32,
+      weight: 42,
       timestamp: 1234567890,
       status: 'ACCEPTED',
     }
@@ -74,14 +104,14 @@ describe('Image Api [New]', () => {
     await action(req, res)
 
     const data = {
+      latitude: null,
+      longitude: null,
+      username: 'client42',
       fieldname: 'foo',
       originalname: 'bar',
       mimetype: 'image/jpeg',
-      weight: 42,
       path: 'baz',
-      username: 'client42',
-      longitude: null,
-      latitude: null,
+      weight: 42,
       timestamp: 1234567890,
       status: 'ACCEPTED',
     }

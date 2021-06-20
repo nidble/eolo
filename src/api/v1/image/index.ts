@@ -1,22 +1,39 @@
+import { isLeft } from 'fp-ts/lib/Either'
 import send from '@polka/send-type'
 import { logger, key } from '../../../utils'
 import { Request, Response } from 'express'
 import { Queue, ResponsePayload } from '../../../../types'
 import { Redis } from 'ioredis'
-import { indexValidator, postValidator } from './validator'
+import { indexValidator, postValidatorLegacy } from './validator'
+import { postValidator } from '../../../validators'
 
 const response = <T>(res: Response, payload: ResponsePayload<T>, httpStatus = 200, headers = {}) => {
   send(res, httpStatus, payload, headers)
 }
 
-export const post = (queue: Queue) => async (req: Request, res: Response) => {
+export const postLegacy = (queue: Queue) => async (req: Request, res: Response) => {
   try {
-    const item = postValidator(req)
+    const item = postValidatorLegacy(req)
     if ('Error' === item.type) {
       return response(res, item, 422)
     }
     await queue.enqueue(item.data)
     response(res, item, 202) // TODO: restrict info sent to client
+  } catch (e) {
+    logger.error(e)
+    // TODO: maybe choose different error verbosity between production and dev (generic vs detailed)
+    response(res, { type: 'Error', errors: [{ message: e.message }] }, 500)
+  }
+}
+
+export const post = (queue: Queue) => async (req: Request, res: Response) => {
+  try {
+    const item = postValidator(req)
+    if (isLeft(item)) {
+      return response(res, { type: 'Error', errors: item.left }, 422)
+    }
+    await queue.enqueue(item.right)
+    response(res, { type: 'Success', data: item.right }, 202) // TODO: restrict info sent to client
   } catch (e) {
     logger.error(e)
     // TODO: maybe choose different error verbosity between production and dev (generic vs detailed)

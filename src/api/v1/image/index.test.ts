@@ -76,9 +76,9 @@ describe('Image Api [New]', () => {
     await action(req, res)
 
     const data = {
+      username: 'client42',
       latitude: 32,
       longitude: 10,
-      username: 'client42',
       fieldname: 'foo',
       originalname: 'bar',
       mimetype: 'image/jpeg',
@@ -104,9 +104,9 @@ describe('Image Api [New]', () => {
     await action(req, res)
 
     const data = {
+      username: 'client42',
       latitude: null,
       longitude: null,
-      username: 'client42',
       fieldname: 'foo',
       originalname: 'bar',
       mimetype: 'image/jpeg',
@@ -129,7 +129,10 @@ describe('Image Api [Listing]', () => {
     const action = index(redis)
 
     await action(req, res)
-    const error = { message: 'username not valid', field: 'username' }
+    const error = {
+      message: "required property 'username' as ' ' is not valid, should be not empty",
+      field: 'username',
+    }
     const payload = { type: 'Error', errors: [error] }
     expect(res.end).toHaveBeenCalledWith(JSON.stringify(payload))
   })

@@ -1,10 +1,11 @@
+/* eslint-disable no-confusing-arrow */
 import * as D from 'io-ts/lib/Decoder'
 import { pipe } from 'fp-ts/lib/function'
 import * as E from 'fp-ts/lib/Either'
 
 import { Request } from 'express'
-import { ErrorResponse } from '../../types'
-import { formatter } from './formatters'
+import { ErrorResponse } from '../../../types'
+import { formatter } from '../formatters'
 
 const ALLOWED_MIMETYPES = ['image/jpeg']
 

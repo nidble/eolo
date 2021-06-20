@@ -4,8 +4,8 @@ import { logger, key } from '../../../utils'
 import { Request, Response } from 'express'
 import { Queue, ResponsePayload } from '../../../../types'
 import { Redis } from 'ioredis'
-import { indexValidator, postValidatorLegacy } from './validator'
-import { postValidator } from '../../../validators'
+import { indexValidator as indexValidatorLegacy, postValidatorLegacy } from './validator'
+import { JobValidator, UsernameValidator } from '../../../validators/image'
 
 const response = <T>(res: Response, payload: ResponsePayload<T>, httpStatus = 200, headers = {}) => {
   send(res, httpStatus, payload, headers)
@@ -28,7 +28,7 @@ export const postLegacy = (queue: Queue) => async (req: Request, res: Response) 
 
 export const post = (queue: Queue) => async (req: Request, res: Response) => {
   try {
-    const item = postValidator(req)
+    const item = JobValidator(req)
     if (isLeft(item)) {
       return response(res, { type: 'Error', errors: item.left }, 422)
     }
@@ -41,8 +41,8 @@ export const post = (queue: Queue) => async (req: Request, res: Response) => {
   }
 }
 
-export const index = (redis: Redis) => async (req: Request, res: Response) => {
-  const item = indexValidator(req)
+export const indexLegacy = (redis: Redis) => async (req: Request, res: Response) => {
+  const item = indexValidatorLegacy(req)
   if ('Error' === item.type) {
     return response(res, item, 422)
   }
@@ -50,5 +50,17 @@ export const index = (redis: Redis) => async (req: Request, res: Response) => {
   // TODO: 0-100 must be dynamic
   // TODO: implement pagination
   const instants = await redis.zrange(key(item.data), 0, 100)
+  response(res, { type: 'Success', data: instants.map((i) => JSON.parse(i)) }, 200)
+}
+
+export const index = (redis: Redis) => async (req: Request, res: Response) => {
+  const item = UsernameValidator(req)
+  if (isLeft(item)) {
+    return response(res, { type: 'Error', errors: item.left }, 422)
+  }
+
+  // TODO: 0-100 must be dynamic
+  // TODO: implement pagination
+  const instants = await redis.zrange(key(item.right.username), 0, 100)
   response(res, { type: 'Success', data: instants.map((i) => JSON.parse(i)) }, 200)
 }

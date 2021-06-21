@@ -19,11 +19,11 @@ describe('Image Api [New]', () => {
     const mq = { enqueue: jest.fn() }
     const action = post(mq)
 
-    await action(req, res)
+    await action(req, res)()
     const payload = {
       type: 'Error',
       errors: [
-        { message: "required property 'username' as 'undefined' is not valid, should be string", field: 'username' },
+        { message: "required property 'username' as 'undefined' is not valid, should be string", scope: 'username' },
       ],
     }
     expect(res.end).toHaveBeenCalledWith(JSON.stringify(payload))
@@ -38,16 +38,16 @@ describe('Image Api [New]', () => {
     const mq = { enqueue: jest.fn() }
     const action = post(mq)
 
-    await action(req, res)
+    await action(req, res)()
     const message1 = "required property 'originalname' as 'undefined' is not valid, should be string"
     const message2 = "required property 'mimetype' as 'undefined' is not valid, should be string"
     const message3 = "required property 'path' as 'undefined' is not valid, should be string"
     const payload = {
       type: 'Error',
       errors: [
-        { message: message1, field: 'image' },
-        { message: message2, field: 'image' },
-        { message: message3, field: 'image' },
+        { message: message1, scope: 'image' },
+        { message: message2, scope: 'image' },
+        { message: message3, scope: 'image' },
       ],
     }
     expect(res.end).toHaveBeenCalledWith(JSON.stringify(payload))
@@ -58,9 +58,9 @@ describe('Image Api [New]', () => {
     const mq = { enqueue: jest.fn() }
     const action = post(mq)
 
-    await action(req, res)
+    await action(req, res)()
     const message = "required property 'mimetype' as '' is not valid, should be image/jpeg"
-    const payload = { type: 'Error', errors: [{ message, field: 'image' }] }
+    const payload = { type: 'Error', errors: [{ message, scope: 'image' }] }
     expect(res.end).toHaveBeenCalledWith(JSON.stringify(payload))
   })
 
@@ -70,10 +70,11 @@ describe('Image Api [New]', () => {
       body: { username: 'client42', longitude: 10, latitude: 32 },
     } as unknown as Request
     const res = resMock()
-    const mq = { enqueue: jest.fn() }
+    // const mq = { enqueue: jest.fn().mockRejectedValue('fuck') }
+    const mq = { enqueue: jest.fn().mockResolvedValue('fuffi') }
     const action = post(mq)
 
-    await action(req, res)
+    await action(req, res)()
 
     const data = {
       username: 'client42',
@@ -98,10 +99,10 @@ describe('Image Api [New]', () => {
       body: { username: 'client42', longitude: 'BROKEN_FIELD' },
     } as unknown as Request
     const res = resMock()
-    const mq = { enqueue: jest.fn() }
+    const mq = { enqueue: jest.fn().mockResolvedValue('fuffi') }
     const action = post(mq)
 
-    await action(req, res)
+    await action(req, res)()
 
     const data = {
       username: 'client42',
@@ -128,10 +129,10 @@ describe('Image Api [Listing]', () => {
     const res = resMock()
     const action = index(redis)
 
-    await action(req, res)
+    await action(req, res)()
     const error = {
       message: "required property 'username' as ' ' is not valid, should be not empty",
-      field: 'username',
+      scope: 'username',
     }
     const payload = { type: 'Error', errors: [error] }
     expect(res.end).toHaveBeenCalledWith(JSON.stringify(payload))
@@ -162,7 +163,7 @@ describe('Image Api [Listing]', () => {
     const res = resMock()
     const action = index(redis)
 
-    await action(req, res)
+    await action(req, res)()
     const payload = { type: 'Success', data: stub }
     expect(res.end).toHaveBeenCalledWith(JSON.stringify(payload))
   })

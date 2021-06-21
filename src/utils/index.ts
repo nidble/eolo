@@ -5,6 +5,8 @@ import sharp from 'sharp'
 import pino from 'pino'
 import { LOG_LEVEL, REDIS_PREFIX, UPLOADS_FOLDER } from '../config'
 import { Job } from '../../types'
+import { Request, Response } from 'express'
+import { Task } from 'fp-ts/lib/Task'
 
 export const logger = pino({ level: LOG_LEVEL })
 
@@ -33,6 +35,10 @@ export const md5 = (s: string) => crypto.createHash('md5').update(s).digest('hex
 
 export const time = () => +new Date()
 
-export const key = (username: string) => md5(`${REDIS_PREFIX}:instant:${username}`)
+export const key = (username: string) => `${REDIS_PREFIX}:instant:${md5(username)}`
 
 export const getImageName = (originalname: string) => `${dir}/${originalname}`
+
+export function taskExecutor(task: (req: Request, res: Response) => Task<void>) {
+  return (req: Request, res: Response) => task(req, res)()
+}

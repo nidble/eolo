@@ -1,4 +1,5 @@
 import { setInterval } from 'timers/promises'
+
 import RedisSMQ from 'rsmq'
 import { Redis } from 'ioredis'
 import { logger } from '../utils'

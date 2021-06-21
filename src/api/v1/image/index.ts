@@ -1,66 +1,62 @@
-import { isLeft } from 'fp-ts/lib/Either'
+import * as E from 'fp-ts/lib/Either'
+import * as TE from 'fp-ts/lib/TaskEither'
+import * as T from 'fp-ts/lib/Task'
+import { flow, pipe } from 'fp-ts/lib/function'
+import * as J from 'fp-ts/lib/Json'
+
 import send from '@polka/send-type'
-import { logger, key } from '../../../utils'
+import { key, time } from '../../../utils'
 import { Request, Response } from 'express'
-import { Queue, ResponsePayload } from '../../../../types'
+import { ErrorLine, Job, Queue, ResponsePayload } from '../../../../types'
 import { Redis } from 'ioredis'
-import { indexValidator as indexValidatorLegacy, postValidatorLegacy } from './validator'
-import { JobValidator, UsernameValidator } from '../../../validators/image'
+import { imagePostValidator, fromJsonToInstant, User, UserAndGeo, UserValidator } from '../../../validators/image'
+import { File } from '../../../validators/image/file'
+import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray'
+import { formatter } from '../../../validators/formatters'
 
-const response = <T>(res: Response, payload: ResponsePayload<T>, httpStatus = 200, headers = {}) => {
-  send(res, httpStatus, payload, headers)
+const response = <T>(res: Response, payload: ResponsePayload<T>, httpStatus = 200, headers = {}) =>
+  T.of(send(res, httpStatus, payload, headers))
+
+function errorFactory(scope: string) {
+  return (cause: unknown): NonEmptyArray<ErrorLine> => [{ message: String(cause), scope }]
 }
 
-export const postLegacy = (queue: Queue) => async (req: Request, res: Response) => {
-  try {
-    const item = postValidatorLegacy(req)
-    if ('Error' === item.type) {
-      return response(res, item, 422)
-    }
-    await queue.enqueue(item.data)
-    response(res, item, 202) // TODO: restrict info sent to client
-  } catch (e) {
-    logger.error(e)
-    // TODO: maybe choose different error verbosity between production and dev (generic vs detailed)
-    response(res, { type: 'Error', errors: [{ message: e.message }] }, 500)
-  }
+function enqueueTask(queue: Queue) {
+  return (job: Job): TE.TaskEither<Array<ErrorLine>, string> =>
+    TE.tryCatch(() => queue.enqueue(job), errorFactory('enqueue'))
+}
+function zrangeTask(redis: Redis) {
+  return (user: User): TE.TaskEither<Array<ErrorLine>, string[]> =>
+    TE.tryCatch(() => redis.zrange(key(user.username), 0, 100), errorFactory('zrange'))
 }
 
-export const post = (queue: Queue) => async (req: Request, res: Response) => {
-  try {
-    const item = JobValidator(req)
-    if (isLeft(item)) {
-      return response(res, { type: 'Error', errors: item.left }, 422)
-    }
-    await queue.enqueue(item.right)
-    response(res, { type: 'Success', data: item.right }, 202) // TODO: restrict info sent to client
-  } catch (e) {
-    logger.error(e)
-    // TODO: maybe choose different error verbosity between production and dev (generic vs detailed)
-    response(res, { type: 'Error', errors: [{ message: e.message }] }, 500)
-  }
+function prepareJobPayload({ size, ...parsedReq }: UserAndGeo & File): Job {
+  return { ...parsedReq, weight: size, timestamp: time(), status: 'ACCEPTED' }
 }
 
-export const indexLegacy = (redis: Redis) => async (req: Request, res: Response) => {
-  const item = indexValidatorLegacy(req)
-  if ('Error' === item.type) {
-    return response(res, item, 422)
-  }
+export const post = (queue: Queue) => (req: Request, res: Response) =>
+  pipe(
+    imagePostValidator(req),
+    E.map(prepareJobPayload),
+    TE.fromEither,
+    TE.chainFirst(enqueueTask(queue)),
+    TE.fold(
+      (errors) => response(res, { type: 'Error', errors }, 422),
+      (job) => response(res, { type: 'Success', data: job }, 202),
+    ),
+  )
 
-  // TODO: 0-100 must be dynamic
-  // TODO: implement pagination
-  const instants = await redis.zrange(key(item.data), 0, 100)
-  response(res, { type: 'Success', data: instants.map((i) => JSON.parse(i)) }, 200)
-}
+const parseInstant = flow(J.parse, fromJsonToInstant, E.mapLeft(formatter), E.mapLeft(errorFactory('json.parse')))
 
-export const index = (redis: Redis) => async (req: Request, res: Response) => {
-  const item = UsernameValidator(req)
-  if (isLeft(item)) {
-    return response(res, { type: 'Error', errors: item.left }, 422)
-  }
-
-  // TODO: 0-100 must be dynamic
-  // TODO: implement pagination
-  const instants = await redis.zrange(key(item.right.username), 0, 100)
-  response(res, { type: 'Success', data: instants.map((i) => JSON.parse(i)) }, 200)
-}
+export const index = (redis: Redis) => (req: Request, res: Response) =>
+  pipe(
+    UserValidator(req),
+    TE.fromEither,
+    TE.chain(zrangeTask(redis)),
+    TE.map(E.traverseArray(parseInstant)),
+    T.map(E.flatten),
+    TE.fold(
+      (errors) => response(res, { type: 'Error', errors }, 422),
+      (instants) => response(res, { type: 'Success', data: instants }, 200),
+    ),
+  )

@@ -1,12 +1,12 @@
 import * as D from 'io-ts/lib/Decoder'
-import { pipe } from 'fp-ts/lib/function'
+import { flow, pipe } from 'fp-ts/lib/function'
 import * as E from 'fp-ts/lib/Either'
+import * as J from 'fp-ts/lib/Json'
 
 import { Request } from 'express'
-import { ErrorResponse, Job } from '../../../types'
+import { ErrorLine, Instant } from '../../../types'
 import { formatter } from '../formatters'
-import { FileValidator } from './file'
-import { time } from '../../utils'
+import { FileValidator, File } from './file'
 
 interface NoEmptyBrand {
   readonly NoEmpty: unique symbol
@@ -22,34 +22,47 @@ const OptionalNumber: D.Decoder<unknown, number | null> = {
   decode: (u?) => (typeof u === 'number' ? D.success(u) : D.success(Number(u) || null)),
 }
 
-const UsernameDecoder = D.struct({ username: NoEmpty })
+const UserDecoder = D.struct({ username: NoEmpty })
 const GeoDecoder = D.struct({ latitude: OptionalNumber, longitude: OptionalNumber })
+const UserAndGeoDecoder = pipe(UserDecoder, D.intersect(GeoDecoder))
+const InstantDecoder = D.struct({
+  name: D.string,
+  username: D.string,
+  weight: D.number,
+  latitude: OptionalNumber,
+  longitude: OptionalNumber,
+  timestamp: D.number,
+})
 
-const UsernameGeoDecoder = pipe(UsernameDecoder, D.intersect(GeoDecoder))
+export type UserAndGeo = D.TypeOf<typeof UserAndGeoDecoder>
+export type User = D.TypeOf<typeof UserDecoder>
 
-type UsernameGeo = D.TypeOf<typeof UsernameGeoDecoder>
-type Username = D.TypeOf<typeof UsernameDecoder>
-
-export const UsernameGeoValidator = (req: Request): E.Either<ErrorResponse[], UsernameGeo> =>
+export const UserGeoValidator = (req: Request): E.Either<ErrorLine[], UserAndGeo> =>
   pipe(
-    UsernameGeoDecoder.decode(req.body),
-    E.mapLeft((errors) => formatter(errors).map((e) => ({ message: e, field: 'username' }))),
+    UserAndGeoDecoder.decode(req.body),
+    E.mapLeft((errors) => formatter(errors).map((e) => ({ message: e, scope: 'username' }))),
   )
 
-export const UsernameValidator = (req: Request): E.Either<ErrorResponse[], Username> =>
+export const UserValidator = (req: Request): E.Either<ErrorLine[], User> =>
   pipe(
-    UsernameDecoder.decode(req.params),
-    E.mapLeft((errors) => formatter(errors).map((e) => ({ message: e, field: 'username' }))),
+    UserDecoder.decode(req.params),
+    E.mapLeft((errors) => formatter(errors).map((e) => ({ message: e, scope: 'username' }))),
   )
 
-export const JobValidator = (req: Request): E.Either<ErrorResponse[], Job> =>
+// type Instant = D.TypeOf<typeof InstantDecoder>
+
+export const parseInstant: (e: E.Either<unknown, J.Json>) => E.Either<D.DecodeError, Instant> = flow(
+  E.mapLeft((e) => D.error(e, 'J.Json.parse')),
+  E.chain(InstantDecoder.decode),
+)
+
+export const imagePostValidator = (req: Request): E.Either<ErrorLine[], UserAndGeo & File> =>
   pipe(
-    UsernameGeoValidator(req),
+    UserGeoValidator(req),
     E.chain((body) =>
       pipe(
         FileValidator(req),
         E.map((file) => ({ ...body, ...file })),
       ),
     ),
-    E.map(({ size, ...parsedReq }) => ({ ...parsedReq, weight: size, timestamp: time(), status: 'ACCEPTED' })),
   )

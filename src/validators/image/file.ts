@@ -4,7 +4,7 @@ import { pipe } from 'fp-ts/lib/function'
 import * as E from 'fp-ts/lib/Either'
 
 import { Request } from 'express'
-import { ErrorResponse } from '../../../types'
+import { ErrorLine } from '../../../types'
 import { formatter } from '../formatters'
 
 const ALLOWED_MIMETYPES = ['image/jpeg']
@@ -20,10 +20,10 @@ const FileDecoder = D.struct({
   path: D.string,
 })
 
-type File = D.TypeOf<typeof FileDecoder>
+export type File = D.TypeOf<typeof FileDecoder>
 
-export const FileValidator = (req: Request): E.Either<ErrorResponse[], File> =>
+export const FileValidator = (req: Request): E.Either<ErrorLine[], File> =>
   pipe(
     FileDecoder.decode(req.file),
-    E.mapLeft((errors) => formatter(errors).map((e) => ({ message: e, field: 'image' }))),
+    E.mapLeft((errors) => formatter(errors).map((e) => ({ message: e, scope: 'image' }))),
   )

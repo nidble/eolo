@@ -17,14 +17,13 @@ const buildInstant = ({ originalname, username, weight, latitude, longitude, tim
 })
 
 export const process = async (resp: Record<string, never> | RedisSMQ.QueueMessage, redis: Redis) => {
-  if (isValidQueueMessage(resp)) {
-    const job: Job = JSON.parse(resp.message)
-    await resize(job)
-    const instant = buildInstant(job)
-
-    await redis.zadd(key(instant.username), instant.timestamp, JSON.stringify(instant))
-    logger.info(job, '[polling]: job successfully processed, ready to start new one..')
-  } else {
-    logger.info('[polling]: no available message in queue..')
+  if (!isValidQueueMessage(resp)) {
+    return logger.info('[polling]: no available message in queue..')
   }
+  const job: Job = JSON.parse(resp.message)
+  await resize(job)
+  const instant = buildInstant(job)
+
+  await redis.zadd(key(instant.username), instant.timestamp, JSON.stringify(instant))
+  logger.info(job, '[polling]: job successfully processed, ready to start new one..')
 }

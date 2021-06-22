@@ -20,17 +20,16 @@ export interface SuccessPayload<T> {
   data: T
 }
 
-export interface ErrorResponse {
+export interface ErrorLine {
   message: string
-  field?: string
+  scope: string
 }
 
 export interface ErrorsResponse {
   type: 'Error'
-  errors: ReadonlyArray<ErrorResponse>
+  errors: ReadonlyArray<ErrorLine>
 }
 
 export type ResponsePayload<T> = SuccessPayload<T> | ErrorsResponse
 
 export type Dispatch = (j: Job) => Promise<string>
-export type Queue = { enqueue: Dispatch }

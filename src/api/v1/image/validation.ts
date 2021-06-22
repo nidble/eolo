@@ -4,23 +4,12 @@ import * as E from 'fp-ts/lib/Either'
 import * as J from 'fp-ts/lib/Json'
 
 import { Request } from 'express'
-import { ErrorLine, Instant } from '../../../types'
-import { formatter } from '../formatters'
-import { FileValidator, File } from './file'
-
-interface NoEmptyBrand {
-  readonly NoEmpty: unique symbol
-}
-type NoEmpty = string & NoEmptyBrand
-
-const NoEmpty: D.Decoder<unknown, NoEmpty> = pipe(
-  D.string,
-  D.refine((s: string): s is NoEmpty => s.trim() !== '', 'not empty'),
-)
-
-const OptionalNumber: D.Decoder<unknown, number | null> = {
-  decode: (u?) => (typeof u === 'number' ? D.success(u) : D.success(Number(u) || null)),
-}
+import { ErrorLine, Instant } from '../../../../types'
+import { decodeErrorFormatter, OptionalNumber } from '../../../validators'
+import { FileValidator, File } from '../../../validators/file'
+import { NoEmpty } from '../../../validators'
+import { errorFactory } from '../../../utils'
+import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray'
 
 const UserDecoder = D.struct({ username: NoEmpty })
 const GeoDecoder = D.struct({ latitude: OptionalNumber, longitude: OptionalNumber })
@@ -36,24 +25,26 @@ const InstantDecoder = D.struct({
 
 export type UserAndGeo = D.TypeOf<typeof UserAndGeoDecoder>
 export type User = D.TypeOf<typeof UserDecoder>
+// type Instant = D.TypeOf<typeof InstantDecoder>
 
 export const UserGeoValidator = (req: Request): E.Either<ErrorLine[], UserAndGeo> =>
   pipe(
     UserAndGeoDecoder.decode(req.body),
-    E.mapLeft((errors) => formatter(errors).map((e) => ({ message: e, scope: 'username' }))),
+    E.mapLeft((errors) => decodeErrorFormatter(errors).map((e) => ({ message: e, scope: 'username' }))),
   )
 
 export const UserValidator = (req: Request): E.Either<ErrorLine[], User> =>
   pipe(
     UserDecoder.decode(req.params),
-    E.mapLeft((errors) => formatter(errors).map((e) => ({ message: e, scope: 'username' }))),
+    E.mapLeft((errors) => decodeErrorFormatter(errors).map((e) => ({ message: e, scope: 'username' }))),
   )
 
-// type Instant = D.TypeOf<typeof InstantDecoder>
-
-export const parseInstant: (e: E.Either<unknown, J.Json>) => E.Either<D.DecodeError, Instant> = flow(
-  E.mapLeft((e) => D.error(e, 'J.Json.parse')),
-  E.chain(InstantDecoder.decode),
+export const parseInstant: (s: string) => E.Either<NonEmptyArray<ErrorLine>, Instant> = flow(
+  J.parse,
+  E.mapLeft((e) => D.error(e, 'J.Json.parse')), // E.Either<unknown, J.Json> => E.Either<D.DecodeError,  J.Json>
+  E.chain(InstantDecoder.decode), // E.Either<D.DecodeError,  J.Json> => E.Either<D.DecodeError, Instant>
+  E.mapLeft(decodeErrorFormatter),
+  E.mapLeft(errorFactory('json.parse')),
 )
 
 export const imagePostValidator = (req: Request): E.Either<ErrorLine[], UserAndGeo & File> =>

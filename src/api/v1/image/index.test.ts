@@ -2,6 +2,9 @@
 import { Request, Response } from 'express'
 import { Redis } from 'ioredis'
 import { post, index } from '.'
+import model from '../../../model'
+import { Queue } from '../../../queue'
+import { taskExecutor } from '../../../utils'
 
 jest.mock('../../../utils', () => ({
   ...jest.requireActual('../../../utils'),
@@ -16,7 +19,7 @@ describe('Image Api [New]', () => {
   it('return error if no username is specified', async () => {
     const req = { file: {}, body: {} } as unknown as Request
     const res = resMock()
-    const mq = { enqueue: jest.fn() }
+    const mq = { enqueueTask: jest.fn() } as unknown as Queue
     const action = post(mq)
 
     await action(req, res)()
@@ -35,7 +38,7 @@ describe('Image Api [New]', () => {
       body: { username: 'client42' },
     } as unknown as Request
     const res = resMock()
-    const mq = { enqueue: jest.fn() }
+    const mq = { enqueueTask: jest.fn() } as unknown as Queue
     const action = post(mq)
 
     await action(req, res)()
@@ -55,7 +58,7 @@ describe('Image Api [New]', () => {
   it('return error if uploaded file has an invalid mimetype', async () => {
     const req = { file: { ...baseFile, mimetype: '' }, body: { username: 'client42' } } as unknown as Request
     const res = resMock()
-    const mq = { enqueue: jest.fn() }
+    const mq = { enqueueTask: jest.fn() } as unknown as Queue
     const action = post(mq)
 
     await action(req, res)()
@@ -70,11 +73,10 @@ describe('Image Api [New]', () => {
       body: { username: 'client42', longitude: 10, latitude: 32 },
     } as unknown as Request
     const res = resMock()
-    // const mq = { enqueue: jest.fn().mockRejectedValue('fuck') }
-    const mq = { enqueue: jest.fn().mockResolvedValue('fuffi') }
-    const action = post(mq)
+    const mq = { enqueueTask: jest.fn(() => () => Promise.resolve('fuffi')) } as unknown as Queue
+    const action = taskExecutor(post(mq))
 
-    await action(req, res)()
+    await action(req, res)
 
     const data = {
       username: 'client42',
@@ -90,7 +92,7 @@ describe('Image Api [New]', () => {
     }
     const payload = { type: 'Success', data }
     expect(res.end).toHaveBeenCalledWith(JSON.stringify(payload))
-    expect(mq.enqueue).toHaveBeenCalledWith(data)
+    expect(mq.enqueueTask).toHaveBeenCalledWith(data)
   })
 
   it('manage broken field like longitude and latitude', async () => {
@@ -99,10 +101,10 @@ describe('Image Api [New]', () => {
       body: { username: 'client42', longitude: 'BROKEN_FIELD' },
     } as unknown as Request
     const res = resMock()
-    const mq = { enqueue: jest.fn().mockResolvedValue('fuffi') }
-    const action = post(mq)
+    const mq = { enqueueTask: jest.fn(() => () => Promise.resolve('fuffi')) } as unknown as Queue
+    const action = taskExecutor(post(mq))
 
-    await action(req, res)()
+    await action(req, res)
 
     const data = {
       username: 'client42',
@@ -118,16 +120,17 @@ describe('Image Api [New]', () => {
     }
     const payload = { type: 'Success', data }
     expect(res.end).toHaveBeenCalledWith(JSON.stringify(payload))
-    expect(mq.enqueue).toHaveBeenCalledWith(data)
+    expect(mq.enqueueTask).toHaveBeenCalledWith(data)
   })
 })
 
 describe('Image Api [Listing]', () => {
   it('require an username param', async () => {
     const redis = {} as unknown as Redis
+    const m = model(redis)
     const req = { params: { username: ' ' } } as unknown as Request
     const res = resMock()
-    const action = index(redis)
+    const action = index(m)
 
     await action(req, res)()
     const error = {
@@ -161,7 +164,7 @@ describe('Image Api [Listing]', () => {
     const redis = { zrange: jest.fn().mockResolvedValue(stub.map((i) => JSON.stringify(i))) } as unknown as Redis
     const req = { params: { username: 'pippo' } } as unknown as Request
     const res = resMock()
-    const action = index(redis)
+    const action = index(model(redis))
 
     await action(req, res)()
     const payload = { type: 'Success', data: stub }

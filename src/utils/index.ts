@@ -4,9 +4,10 @@ import fs from 'fs/promises'
 import sharp from 'sharp'
 import pino from 'pino'
 import { LOG_LEVEL, REDIS_PREFIX, UPLOADS_FOLDER } from '../config'
-import { Job } from '../../types'
+import { ErrorLine, Job } from '../../types'
 import { Request, Response } from 'express'
 import { Task } from 'fp-ts/lib/Task'
+import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray'
 
 export const logger = pino({ level: LOG_LEVEL })
 
@@ -41,4 +42,8 @@ export const getImageName = (originalname: string) => `${dir}/${originalname}`
 
 export function taskExecutor(task: (req: Request, res: Response) => Task<void>) {
   return (req: Request, res: Response) => task(req, res)()
+}
+
+export function errorFactory(scope: string) {
+  return (cause: unknown): NonEmptyArray<ErrorLine> => [{ message: String(cause), scope }]
 }

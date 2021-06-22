@@ -1,34 +1,20 @@
+import send from '@polka/send-type'
 import * as E from 'fp-ts/lib/Either'
 import * as TE from 'fp-ts/lib/TaskEither'
 import * as T from 'fp-ts/lib/Task'
-import { flow, pipe } from 'fp-ts/lib/function'
-import * as J from 'fp-ts/lib/Json'
+import { pipe } from 'fp-ts/lib/function'
 
-import send from '@polka/send-type'
-import { key, time } from '../../../utils'
+import { time } from '../../../utils'
 import { Request, Response } from 'express'
-import { ErrorLine, Job, Queue, ResponsePayload } from '../../../../types'
-import { Redis } from 'ioredis'
-import { imagePostValidator, fromJsonToInstant, User, UserAndGeo, UserValidator } from '../../../validators/image'
-import { File } from '../../../validators/image/file'
-import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray'
-import { formatter } from '../../../validators/formatters'
+import { Job, ResponsePayload } from '../../../../types'
+
+import { imagePostValidator, UserAndGeo, UserValidator, parseInstant } from './validation'
+import { File } from '../../../validators/file'
+import { Queue } from '../../../queue'
+import { Model } from '../../../model'
 
 const response = <T>(res: Response, payload: ResponsePayload<T>, httpStatus = 200, headers = {}) =>
   T.of(send(res, httpStatus, payload, headers))
-
-function errorFactory(scope: string) {
-  return (cause: unknown): NonEmptyArray<ErrorLine> => [{ message: String(cause), scope }]
-}
-
-function enqueueTask(queue: Queue) {
-  return (job: Job): TE.TaskEither<Array<ErrorLine>, string> =>
-    TE.tryCatch(() => queue.enqueue(job), errorFactory('enqueue'))
-}
-function zrangeTask(redis: Redis) {
-  return (user: User): TE.TaskEither<Array<ErrorLine>, string[]> =>
-    TE.tryCatch(() => redis.zrange(key(user.username), 0, 100), errorFactory('zrange'))
-}
 
 function prepareJobPayload({ size, ...parsedReq }: UserAndGeo & File): Job {
   return { ...parsedReq, weight: size, timestamp: time(), status: 'ACCEPTED' }
@@ -39,20 +25,18 @@ export const post = (queue: Queue) => (req: Request, res: Response) =>
     imagePostValidator(req),
     E.map(prepareJobPayload),
     TE.fromEither,
-    TE.chainFirst(enqueueTask(queue)),
+    TE.chainFirst(queue.enqueueTask),
     TE.fold(
       (errors) => response(res, { type: 'Error', errors }, 422),
       (job) => response(res, { type: 'Success', data: job }, 202),
     ),
   )
 
-const parseInstant = flow(J.parse, fromJsonToInstant, E.mapLeft(formatter), E.mapLeft(errorFactory('json.parse')))
-
-export const index = (redis: Redis) => (req: Request, res: Response) =>
+export const index = (model: Model) => (req: Request, res: Response) =>
   pipe(
     UserValidator(req),
     TE.fromEither,
-    TE.chain(zrangeTask(redis)),
+    TE.chain(model.fetchByDateTask),
     TE.map(E.traverseArray(parseInstant)),
     T.map(E.flatten),
     TE.fold(

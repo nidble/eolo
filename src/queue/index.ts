@@ -1,9 +1,10 @@
 import { setInterval } from 'timers/promises'
-
 import RedisSMQ from 'rsmq'
 import { Redis } from 'ioredis'
-import { logger } from '../utils'
-import { Job } from '../../types'
+import * as TE from 'fp-ts/lib/TaskEither'
+
+import { errorFactory, logger } from '../utils'
+import { ErrorLine, Job } from '../../types'
 import { process } from './helper'
 
 export const enqueue = (rsmq: RedisSMQ, qname: string) => (job: Job) => {
@@ -41,8 +42,25 @@ export const polling = (redis: Redis, rsmq: RedisSMQ, qname: string) => async (d
   }
 }
 
-export default (redis: Redis, rsmq: RedisSMQ, qname: string) => ({
-  enqueue: enqueue(rsmq, qname),
-  createQueue: createQueue(rsmq, qname),
-  polling: polling(redis, rsmq, qname),
-})
+export function enqueueTask(rsmq: RedisSMQ, qname: string) {
+  return (job: Job): TE.TaskEither<Array<ErrorLine>, string> => {
+    const payload = {
+      qname,
+      message: JSON.stringify(job),
+      delay: 2, // TODO: tuning me
+    }
+    return TE.tryCatch(() => rsmq.sendMessageAsync(payload), errorFactory('enqueue'))
+  }
+}
+
+const queue = (redis: Redis, rsmq: RedisSMQ, qname: string) =>
+  ({
+    enqueue: enqueue(rsmq, qname),
+    enqueueTask: enqueueTask(rsmq, qname),
+    createQueue: createQueue(rsmq, qname),
+    polling: polling(redis, rsmq, qname),
+  } as const)
+
+export type Queue = ReturnType<typeof queue>
+
+export default queue

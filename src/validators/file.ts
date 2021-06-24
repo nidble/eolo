@@ -5,7 +5,7 @@ import * as E from 'fp-ts/lib/Either'
 
 import { Request } from 'express'
 import { ErrorLine } from '../../types'
-import { decodeErrorFormatter } from '.'
+import { decodeErrorFormatter } from './helper'
 
 const ALLOWED_MIMETYPES = ['image/jpeg']
 

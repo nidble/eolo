@@ -1,7 +1,7 @@
 import { Redis } from 'ioredis'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { ErrorLine } from '../../types'
-import { User } from '../api/v1/image/validation'
+import { User } from '../validators/image'
 import { errorFactory, key } from '../utils'
 
 function zrangeTask(redis: Redis) {

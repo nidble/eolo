@@ -8,7 +8,7 @@ import { time } from '../../../utils'
 import { Request, Response } from 'express'
 import { Job, ResponsePayload } from '../../../../types'
 
-import { imagePostValidator, UserAndGeo, UserValidator, parseInstant } from './validation'
+import { imagePostValidator, UserAndGeo, UserValidator, parseInstant } from '../../../validators/image'
 import { File } from '../../../validators/file'
 import { Queue } from '../../../queue'
 import { Model } from '../../../model'

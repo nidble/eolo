@@ -4,11 +4,11 @@ import * as E from 'fp-ts/lib/Either'
 import * as J from 'fp-ts/lib/Json'
 
 import { Request } from 'express'
-import { ErrorLine, Instant } from '../../../../types'
-import { decodeErrorFormatter, OptionalNumber } from '../../../validators'
-import { FileValidator, File } from '../../../validators/file'
-import { NoEmpty } from '../../../validators'
-import { errorFactory } from '../../../utils'
+import { ErrorLine, Instant } from '../../types'
+import { decodeErrorFormatter, OptionalNumber } from './helper'
+import { FileValidator, File } from './file'
+import { NoEmpty } from './helper'
+import { errorFactory } from '../utils'
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray'
 
 const UserDecoder = D.struct({ username: NoEmpty })

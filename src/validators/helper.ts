@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import * as D from 'io-ts/lib/Decoder'
 import * as DE from 'io-ts/lib/DecodeError'
-import { pipe } from 'fp-ts/lib/function'
+import { absurd, pipe } from 'fp-ts/lib/function'
 
 interface NoEmptyBrand {
   readonly NoEmpty: unique symbol
@@ -41,6 +41,8 @@ export const decodeErrorFormatter = (error: D.DecodeError): Array<string> => {
     case 'Of':
       result = [...result, child(error.value)]
       break
+    default:
+      absurd(error)
   }
   return result
 }

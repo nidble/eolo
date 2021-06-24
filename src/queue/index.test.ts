@@ -28,7 +28,7 @@ describe('Queue factory', () => {
   })
 
   it('polling works', async () => {
-    const callback = jest.fn()
+    const callback = jest.fn().mockResolvedValue(42)
     const redisSMQ = { popMessageAsync: callback } as unknown as RedisSMQ
 
     const r = {} as unknown as Redis

@@ -5,7 +5,7 @@ import * as TE from 'fp-ts/lib/TaskEither'
 
 import { errorFactory, logger } from '../utils'
 import { ErrorLine, Job } from '../../types'
-import { process } from './helper'
+import { processMessage } from './helper'
 
 export const createQueue = (rsmq: RedisSMQ, qname: string) => async () => {
   try {
@@ -22,13 +22,10 @@ export const createQueue = (rsmq: RedisSMQ, qname: string) => async () => {
 export const polling = (redis: Redis, rsmq: RedisSMQ, qname: string) => async (delay: number, cap: number) => {
   let i = 0
   for await (const startTimeIgnored of setInterval(delay, Date.now())) {
-    try {
-      const resp = await rsmq.popMessageAsync({ qname })
-      await process(resp, redis)
-    } catch (error) {
-      logger.error(error, '[polling]: failed')
+    await processMessage(redis, rsmq, qname)()
+    if (cap >= i) {
+      break
     }
-    if (cap >= i) break
     i++
   }
 }

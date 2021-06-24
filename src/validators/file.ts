@@ -12,7 +12,7 @@ const ALLOWED_MIMETYPES = ['image/jpeg']
 const mimetypes = (u: string) =>
   ALLOWED_MIMETYPES.includes(u) ? D.success(u) : D.failure(u, ALLOWED_MIMETYPES.join(';'))
 
-const FileDecoder = D.struct({
+export const FileDecoder = D.struct({
   fieldname: D.string,
   originalname: D.string,
   mimetype: pipe(D.string, D.parse(mimetypes)),

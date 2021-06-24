@@ -7,15 +7,6 @@ import { errorFactory, logger } from '../utils'
 import { ErrorLine, Job } from '../../types'
 import { process } from './helper'
 
-export const enqueue = (rsmq: RedisSMQ, qname: string) => (job: Job) => {
-  const payload = {
-    qname,
-    message: JSON.stringify(job),
-    delay: 2, // TODO: tuning me
-  }
-  return rsmq.sendMessageAsync(payload)
-}
-
 export const createQueue = (rsmq: RedisSMQ, qname: string) => async () => {
   try {
     await rsmq.createQueueAsync({ qname })
@@ -55,7 +46,6 @@ export function enqueueTask(rsmq: RedisSMQ, qname: string) {
 
 const queue = (redis: Redis, rsmq: RedisSMQ, qname: string) =>
   ({
-    enqueue: enqueue(rsmq, qname),
     enqueueTask: enqueueTask(rsmq, qname),
     createQueue: createQueue(rsmq, qname),
     polling: polling(redis, rsmq, qname),

@@ -1,6 +1,6 @@
 import RedisSMQ from 'rsmq'
 import { Redis } from 'ioredis'
-import queue, { enqueue, createQueue, polling } from '.'
+import queue, { enqueueTask, createQueue, polling } from '.'
 import { Job } from '../../types'
 
 const qname = '42'
@@ -8,9 +8,9 @@ const qname = '42'
 describe('Queue factory', () => {
   it('enqueue works', async () => {
     const message = { question: 42 } as unknown as Job
-    const redisSMQ = { sendMessageAsync: jest.fn() } as unknown as RedisSMQ
-    const method = enqueue(redisSMQ, qname)
-    await method(message)
+    const redisSMQ = { sendMessageAsync: jest.fn().mockResolvedValue('work!') } as unknown as RedisSMQ
+    const method = enqueueTask(redisSMQ, qname)
+    await method(message)()
 
     expect(redisSMQ.sendMessageAsync).toHaveBeenCalledWith({
       delay: expect.any(Number),
@@ -44,7 +44,7 @@ describe('Queue factory', () => {
     const r = {} as unknown as Redis
     const q = queue(r, redisSMQ, qname)
     expect(q).toMatchObject({
-      enqueue: expect.anything(),
+      enqueueTask: expect.anything(),
       createQueue: expect.anything(),
       polling: expect.anything(),
     })

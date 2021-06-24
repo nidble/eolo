@@ -13,7 +13,7 @@ const app: polka.Polka = polka()
 const redis = new Redis(redisOpts)
 const rsmq = new RedisSMQ(redisOpts)
 const m = model(redis)
-const q = queue(redis, rsmq, QNAME)
+const q = queue(m, rsmq, QNAME)
 
 app.use(logger, json, cors)
 

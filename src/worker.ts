@@ -3,10 +3,12 @@ import RedisSMQ from 'rsmq'
 import queue from './queue'
 import { redisOpts, QNAME, POLLING_TIME } from './config'
 import { createFolder } from './utils'
+import model from './model'
 
 const redis = new Redis(redisOpts)
+
 const rsmq = new RedisSMQ(redisOpts)
-const q = queue(redis, rsmq, QNAME)
+const q = queue(model(redis), rsmq, QNAME)
 
 await createFolder()
 

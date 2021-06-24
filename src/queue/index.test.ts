@@ -2,6 +2,7 @@ import RedisSMQ from 'rsmq'
 import { Redis } from 'ioredis'
 import queue, { enqueueTask, createQueue, polling } from '.'
 import { Job } from '../../types'
+import model from '../model'
 
 const qname = '42'
 
@@ -32,7 +33,7 @@ describe('Queue factory', () => {
     const redisSMQ = { popMessageAsync: callback } as unknown as RedisSMQ
 
     const r = {} as unknown as Redis
-    const method = polling(r, redisSMQ, qname)
+    const method = polling(model(r), redisSMQ, qname)
     await method(500, 1)
 
     expect(callback).toBeCalled()
@@ -42,7 +43,7 @@ describe('Queue factory', () => {
   it('initialize correctly', () => {
     const redisSMQ = jest.fn() as unknown as RedisSMQ
     const r = {} as unknown as Redis
-    const q = queue(r, redisSMQ, qname)
+    const q = queue(model(r), redisSMQ, qname)
     expect(q).toMatchObject({
       enqueueTask: expect.anything(),
       createQueue: expect.anything(),

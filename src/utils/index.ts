@@ -7,6 +7,7 @@ import { LOG_LEVEL, REDIS_PREFIX, UPLOADS_FOLDER } from '../config'
 import { ErrorLine, Job } from '../../types'
 import { Request, Response } from 'express'
 import { Task } from 'fp-ts/lib/Task'
+import { toError } from 'fp-ts/lib/Either'
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray'
 
 export const logger = pino({ level: LOG_LEVEL })
@@ -45,5 +46,5 @@ export function taskExecutor(task: (req: Request, res: Response) => Task<void>) 
 }
 
 export function errorFactory(scope: string) {
-  return (cause: unknown): NonEmptyArray<ErrorLine> => [{ message: String(cause), scope }]
+  return (cause: unknown): NonEmptyArray<ErrorLine> => [{ message: toError(cause).message, scope }]
 }

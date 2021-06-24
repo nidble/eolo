@@ -8,7 +8,7 @@ import { time } from '../../../utils'
 import { Request, Response } from 'express'
 import { Job, ResponsePayload } from '../../../../types'
 
-import { imagePostValidator, UserAndGeo, UserValidator, parseInstant } from '../../../validators/image'
+import { ImagePostValidator, UserAndGeo, UserValidator, parseInstant } from '../../../validators/image'
 import { File } from '../../../validators/file'
 import { Queue } from '../../../queue'
 import { Model } from '../../../model'
@@ -16,14 +16,14 @@ import { Model } from '../../../model'
 const response = <T>(res: Response, payload: ResponsePayload<T>, httpStatus = 200, headers = {}) =>
   T.of(send(res, httpStatus, payload, headers))
 
-function prepareJobPayload({ size, ...parsedReq }: UserAndGeo & File): Job {
+function prepareJobQueuePayload({ size, ...parsedReq }: UserAndGeo & File): Job {
   return { ...parsedReq, weight: size, timestamp: time(), status: 'ACCEPTED' }
 }
 
 export const post = (queue: Queue) => (req: Request, res: Response) =>
   pipe(
-    imagePostValidator(req),
-    E.map(prepareJobPayload),
+    ImagePostValidator(req),
+    E.map(prepareJobQueuePayload),
     TE.fromEither,
     TE.chainFirst(queue.enqueueTask),
     TE.fold(

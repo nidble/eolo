@@ -13,6 +13,9 @@ import { FileValidator, File, FileDecoder } from './file'
 import { NoEmpty } from './helper'
 import { errorFactory } from '../utils'
 
+export type UserAndGeo = D.TypeOf<typeof UserAndGeoDecoder>
+export type User = D.TypeOf<typeof UserDecoder>
+
 const UserDecoder = D.struct({ username: NoEmpty })
 const GeoDecoder = D.struct({ latitude: OptionalNumber, longitude: OptionalNumber })
 const UserAndGeoDecoder = pipe(UserDecoder, D.intersect(GeoDecoder))
@@ -20,10 +23,11 @@ const InstantDecoder = pipe(
   D.struct({ name: D.string, weight: D.number, timestamp: D.number }),
   D.intersect(UserAndGeoDecoder),
 )
-export const JobDecoder = pipe(InstantDecoder, D.intersect(D.struct({ status: D.string })), D.intersect(FileDecoder))
-
-export type UserAndGeo = D.TypeOf<typeof UserAndGeoDecoder>
-export type User = D.TypeOf<typeof UserDecoder>
+export const JobQueueDecoder = pipe(
+  InstantDecoder,
+  D.intersect(D.struct({ status: D.string })),
+  D.intersect(FileDecoder),
+)
 
 export const UserGeoValidator = (req: Request): E.Either<ErrorLine[], UserAndGeo> =>
   pipe(
@@ -35,6 +39,17 @@ export const UserValidator = (req: Request): E.Either<ErrorLine[], User> =>
   pipe(
     UserDecoder.decode(req.params),
     E.mapLeft((errors) => decodeErrorFormatter(errors).map((e) => ({ message: e, scope: 'username' }))),
+  )
+
+export const ImagePostValidator = (req: Request): E.Either<ErrorLine[], UserAndGeo & File> =>
+  pipe(
+    UserGeoValidator(req),
+    E.chain((body) =>
+      pipe(
+        FileValidator(req),
+        E.map((file) => ({ ...body, ...file })),
+      ),
+    ),
   )
 
 export const parseInstant: (s: string) => E.Either<NonEmptyArray<ErrorLine>, Instant> = flow(
@@ -50,18 +65,7 @@ export const parseJob = ({ message }: QueueMessage): E.Either<NonEmptyArray<Erro
     message,
     J.parse,
     E.mapLeft((e) => D.error(e, '[parseJob] fail')),
-    E.chain(JobDecoder.decode),
+    E.chain(JobQueueDecoder.decode),
     E.mapLeft(decodeErrorFormatter),
     E.mapLeft(errorFactory('json.parse')),
-  )
-
-export const imagePostValidator = (req: Request): E.Either<ErrorLine[], UserAndGeo & File> =>
-  pipe(
-    UserGeoValidator(req),
-    E.chain((body) =>
-      pipe(
-        FileValidator(req),
-        E.map((file) => ({ ...body, ...file })),
-      ),
-    ),
   )

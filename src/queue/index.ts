@@ -1,10 +1,12 @@
 import { setInterval } from 'timers/promises'
 import RedisSMQ from 'rsmq'
 import * as TE from 'fp-ts/lib/TaskEither'
+import { match } from 'fp-ts/lib/Either'
+import { pipe } from 'fp-ts/lib/function'
 
 import { errorFactory, logger } from '../utils'
-import { ErrorLine, Job } from '../../types'
-import { processMessage } from './helper'
+import { ErrorLine, Instant, Job } from '../../types'
+import { Errors, processQueueMessage } from './helper'
 import { Model } from '../model'
 
 export const createQueue = (rsmq: RedisSMQ, qname: string) => async () => {
@@ -20,13 +22,18 @@ export const createQueue = (rsmq: RedisSMQ, qname: string) => async () => {
 }
 
 export const polling = (model: Model, rsmq: RedisSMQ, qname: string) => async (delay: number, cap: number) => {
-  let i = 0
+  const i = 0
   for await (const startTimeIgnored of setInterval(delay, Date.now())) {
-    await processMessage(model, rsmq, qname)()
+    pipe(
+      await processQueueMessage(model, rsmq, qname)(),
+      match(
+        (errors: Errors) => logger.warn(errors),
+        (i: Instant) => logger.info(i, '[polling]: instant successfully processed, ready to start new one..'),
+      ),
+    )
     if (cap >= i) {
       break
     }
-    i++
   }
 }
 

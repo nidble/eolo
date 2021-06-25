@@ -1,7 +1,7 @@
 import RedisSMQ from 'rsmq'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { pipe } from 'fp-ts/lib/function'
-import { Instant, JobQueue, parseJob } from '../validators/image'
+import { Instant, JobQueue, parseJobQueue } from '../validators/image'
 import * as NEA from 'fp-ts/lib/NonEmptyArray'
 
 import { errorFactory, getImageName, resize } from '../utils'
@@ -38,7 +38,7 @@ export const processQueueMessage = (model: Model, rsmq: RedisSMQ, qname: string)
   pipe(
     popMessageTask(rsmq, qname, 'processMessage'),
     TE.chain(extractQueueMessage),
-    TE.chain((queueMessage) => TE.fromEither(parseJob(queueMessage))),
+    TE.chain(({ message }) => TE.fromEither(parseJobQueue(message))),
     TE.chainFirst((job) => TE.fromTask(() => resize(job))),
     TE.map(buildInstant),
     TE.chainFirst((instant) => model.insertByDateTask(instant, '[processMessage]: insertByDate failed')),

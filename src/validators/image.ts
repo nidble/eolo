@@ -1,4 +1,3 @@
-import { QueueMessage } from 'rsmq'
 import { Request } from 'express'
 
 import * as D from 'io-ts/lib/Decoder'
@@ -21,15 +20,15 @@ export type Instant = D.TypeOf<typeof InstantDecoder>
 const UserDecoder = D.struct({ username: NoEmpty })
 const GeoDecoder = D.struct({ latitude: OptionalNumber, longitude: OptionalNumber })
 const UserAndGeoDecoder = pipe(UserDecoder, D.intersect(GeoDecoder))
-const CommonDecoder = pipe(D.struct({ weight: D.number, timestamp: D.number }), D.intersect(UserAndGeoDecoder))
+const SharedDecoder = pipe(D.struct({ weight: D.number, timestamp: D.number }), D.intersect(UserAndGeoDecoder))
 
 export const JobQueueDecoder = pipe(
-  CommonDecoder,
+  SharedDecoder,
   D.intersect(D.struct({ status: D.string })),
   D.intersect(FileDecoderBase),
 )
 
-const InstantDecoder = pipe(D.struct({ name: D.string }), D.intersect(UserAndGeoDecoder), D.intersect(CommonDecoder))
+const InstantDecoder = pipe(SharedDecoder, D.intersect(D.struct({ name: D.string })), D.intersect(UserAndGeoDecoder))
 
 export const UserGeoValidator = (req: Request): E.Either<ErrorLine[], UserAndGeo> =>
   pipe(
@@ -54,20 +53,17 @@ export const ImagePostValidator = (req: Request): E.Either<ErrorLine[], UserAndG
     ),
   )
 
-export const parseInstant: (s: string) => E.Either<NonEmptyArray<ErrorLine>, Instant> = flow(
-  J.parse,
-  E.mapLeft((e) => D.error(e, '[parseInstant] fail')), // E.Either<unknown, J.Json> => E.Either<D.DecodeError,  J.Json>
-  E.chain(InstantDecoder.decode), // E.Either<D.DecodeError,  J.Json> => E.Either<D.DecodeError, Instant>
-  E.mapLeft(decodeErrorFormatter),
-  E.mapLeft(errorFactory('json.parse')),
-)
-
-export const parseJob = ({ message }: QueueMessage): E.Either<NonEmptyArray<ErrorLine>, JobQueue> =>
+export const JsonParser = <A, T extends D.Decoder<unknown, A>>(decoder: T, input: string, scope: string) =>
   pipe(
-    message,
+    input,
     J.parse,
-    E.mapLeft((e) => D.error(e, '[parseJob] fail')),
-    E.chain(JobQueueDecoder.decode),
-    E.mapLeft(decodeErrorFormatter),
-    E.mapLeft(errorFactory('json.parse')),
+    E.mapLeft((e) => D.error(e, `[${scope}] fails while parsing`)),
+    E.chain(decoder.decode),
+    E.mapLeft(flow(decodeErrorFormatter, errorFactory(scope))),
   )
+
+export const parseInstant = (s: string): E.Either<NonEmptyArray<ErrorLine>, Instant> =>
+  JsonParser(InstantDecoder, s, 'parseInstant')
+
+export const parseJobQueue = (s: string): E.Either<NonEmptyArray<ErrorLine>, JobQueue> =>
+  JsonParser(JobQueueDecoder, s, 'parseJobQueue')

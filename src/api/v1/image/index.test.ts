@@ -145,19 +145,19 @@ describe('Image Api [Listing]', () => {
     const stub = [
       {
         name: '/a/b/32178.jpg',
-        weight: 683305,
-        timestamp: 1624105228293,
         username: 'pluto',
         latitude: null,
         longitude: null,
+        weight: 683305,
+        timestamp: 1624105228293,
       },
       {
         name: '/a/b/32179.jpg',
-        weight: 683305,
-        timestamp: 1624105232377,
         username: 'pluto',
         latitude: null,
         longitude: null,
+        weight: 683305,
+        timestamp: 1624105232377,
       },
     ]
 

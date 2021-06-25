@@ -12,13 +12,21 @@ const ALLOWED_MIMETYPES = ['image/jpeg']
 const mimetypes = (u: string) =>
   ALLOWED_MIMETYPES.includes(u) ? D.success(u) : D.failure(u, ALLOWED_MIMETYPES.join(';'))
 
-export const FileDecoder = D.struct({
+export const FileDecoderBase = D.struct({
   fieldname: D.string,
   originalname: D.string,
   mimetype: pipe(D.string, D.parse(mimetypes)),
-  size: D.number,
   path: D.string,
 })
+
+export const FileDecoder = pipe(
+  FileDecoderBase,
+  D.intersect(
+    D.struct({
+      size: D.number,
+    }),
+  ),
+)
 
 export type File = D.TypeOf<typeof FileDecoder>
 

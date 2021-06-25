@@ -5,9 +5,10 @@ import { match } from 'fp-ts/lib/Either'
 import { pipe } from 'fp-ts/lib/function'
 
 import { errorFactory, logger } from '../utils'
-import { ErrorLine, Instant, Job } from '../../types'
+import { ErrorLine } from '../../types'
 import { Errors, processQueueMessage } from './helper'
 import { Model } from '../model'
+import { Instant, JobQueue } from '../validators/image'
 
 export const createQueue = (rsmq: RedisSMQ, qname: string) => async () => {
   try {
@@ -38,7 +39,7 @@ export const polling = (model: Model, rsmq: RedisSMQ, qname: string) => async (d
 }
 
 export function enqueueTask(rsmq: RedisSMQ, qname: string) {
-  return (job: Job): TE.TaskEither<Array<ErrorLine>, string> => {
+  return (job: JobQueue): TE.TaskEither<Array<ErrorLine>, string> => {
     const payload = {
       qname,
       message: JSON.stringify(job),

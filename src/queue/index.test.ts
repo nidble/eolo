@@ -1,14 +1,14 @@
 import RedisSMQ from 'rsmq'
 import { Redis } from 'ioredis'
 import queue, { enqueueTask, createQueue, polling } from '.'
-import { Job } from '../../types'
 import model from '../model'
+import { JobQueue } from '../validators/image'
 
 const qname = '42'
 
 describe('Queue factory', () => {
   it('enqueue works', async () => {
-    const message = { question: 42 } as unknown as Job
+    const message = { question: 42 } as unknown as JobQueue
     const redisSMQ = { sendMessageAsync: jest.fn().mockResolvedValue('work!') } as unknown as RedisSMQ
     const method = enqueueTask(redisSMQ, qname)
     await method(message)()

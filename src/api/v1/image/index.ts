@@ -6,9 +6,9 @@ import { pipe } from 'fp-ts/lib/function'
 
 import { time } from '../../../utils'
 import { Request, Response } from 'express'
-import { Job, ResponsePayload } from '../../../../types'
+import { ResponsePayload } from '../../../../types'
 
-import { ImagePostValidator, UserAndGeo, UserValidator, parseInstant } from '../../../validators/image'
+import { ImagePostValidator, UserAndGeo, UserValidator, parseInstant, JobQueue } from '../../../validators/image'
 import { File } from '../../../validators/file'
 import { Queue } from '../../../queue'
 import { Model } from '../../../model'
@@ -16,7 +16,7 @@ import { Model } from '../../../model'
 const response = <T>(res: Response, payload: ResponsePayload<T>, httpStatus = 200, headers = {}) =>
   T.of(send(res, httpStatus, payload, headers))
 
-function prepareJobQueuePayload({ size, ...parsedReq }: UserAndGeo & File): Job {
+function prepareJobQueuePayload({ size, ...parsedReq }: UserAndGeo & File): JobQueue {
   return { ...parsedReq, weight: size, timestamp: time(), status: 'ACCEPTED' }
 }
 

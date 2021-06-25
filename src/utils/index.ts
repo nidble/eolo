@@ -4,17 +4,18 @@ import fs from 'fs/promises'
 import sharp from 'sharp'
 import pino from 'pino'
 import { LOG_LEVEL, REDIS_PREFIX, UPLOADS_FOLDER } from '../config'
-import { ErrorLine, Job } from '../../types'
+import { ErrorLine } from '../../types'
 import { Request, Response } from 'express'
 import { Task } from 'fp-ts/lib/Task'
 import { toError } from 'fp-ts/lib/Either'
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray'
+import { JobQueue } from '../validators/image'
 
 export const logger = pino({ level: LOG_LEVEL })
 
 const dir = `${UPLOADS_FOLDER}140x140`
 
-export const resize = async ({ path, originalname }: Job) => {
+export const resize = async ({ path, originalname }: JobQueue) => {
   try {
     const image = await fs.readFile(path)
     // TODO, width, height by env

@@ -1,14 +1,14 @@
 import RedisSMQ from 'rsmq'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { pipe } from 'fp-ts/lib/function'
-import { parseJob } from '../validators/image'
+import { Instant, JobQueue, parseJob } from '../validators/image'
 import * as NEA from 'fp-ts/lib/NonEmptyArray'
 
 import { errorFactory, getImageName, resize } from '../utils'
-import { ErrorLine, Instant, Job } from '../../types'
+import { ErrorLine } from '../../types'
 import { Model } from '../model'
 
-const buildInstant = ({ originalname, username, weight, latitude, longitude, timestamp }: Job): Instant => ({
+const buildInstant = ({ originalname, username, weight, latitude, longitude, timestamp }: JobQueue): Instant => ({
   name: getImageName(originalname),
   username,
   weight,

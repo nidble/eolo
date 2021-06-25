@@ -1,10 +1,9 @@
 import { Redis } from 'ioredis'
 import * as TE from 'fp-ts/lib/TaskEither'
-import { ErrorLine, Instant } from '../../types'
-import { User } from '../validators/image'
-import { errorFactory, key } from '../utils'
-
 import * as NEA from 'fp-ts/lib/NonEmptyArray'
+import { ErrorLine } from '../../types'
+import { Instant, User } from '../validators/image'
+import { errorFactory, key } from '../utils'
 
 type Errors = NEA.NonEmptyArray<ErrorLine>
 

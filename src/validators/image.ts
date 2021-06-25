@@ -7,27 +7,29 @@ import { flow, pipe } from 'fp-ts/lib/function'
 import * as E from 'fp-ts/lib/Either'
 import * as J from 'fp-ts/lib/Json'
 
-import { ErrorLine, Instant, Job } from '../../types'
+import { ErrorLine } from '../../types'
 import { decodeErrorFormatter, OptionalNumber } from './helper'
-import { FileValidator, File, FileDecoder } from './file'
+import { FileValidator, File, FileDecoderBase } from './file'
 import { NoEmpty } from './helper'
 import { errorFactory } from '../utils'
 
 export type UserAndGeo = D.TypeOf<typeof UserAndGeoDecoder>
 export type User = D.TypeOf<typeof UserDecoder>
+export type JobQueue = D.TypeOf<typeof JobQueueDecoder>
+export type Instant = D.TypeOf<typeof InstantDecoder>
 
 const UserDecoder = D.struct({ username: NoEmpty })
 const GeoDecoder = D.struct({ latitude: OptionalNumber, longitude: OptionalNumber })
 const UserAndGeoDecoder = pipe(UserDecoder, D.intersect(GeoDecoder))
-const InstantDecoder = pipe(
-  D.struct({ name: D.string, weight: D.number, timestamp: D.number }),
-  D.intersect(UserAndGeoDecoder),
-)
+const CommonDecoder = pipe(D.struct({ weight: D.number, timestamp: D.number }), D.intersect(UserAndGeoDecoder))
+
 export const JobQueueDecoder = pipe(
-  InstantDecoder,
+  CommonDecoder,
   D.intersect(D.struct({ status: D.string })),
-  D.intersect(FileDecoder),
+  D.intersect(FileDecoderBase),
 )
+
+const InstantDecoder = pipe(D.struct({ name: D.string }), D.intersect(UserAndGeoDecoder), D.intersect(CommonDecoder))
 
 export const UserGeoValidator = (req: Request): E.Either<ErrorLine[], UserAndGeo> =>
   pipe(
@@ -60,7 +62,7 @@ export const parseInstant: (s: string) => E.Either<NonEmptyArray<ErrorLine>, Ins
   E.mapLeft(errorFactory('json.parse')),
 )
 
-export const parseJob = ({ message }: QueueMessage): E.Either<NonEmptyArray<ErrorLine>, Job> =>
+export const parseJob = ({ message }: QueueMessage): E.Either<NonEmptyArray<ErrorLine>, JobQueue> =>
   pipe(
     message,
     J.parse,

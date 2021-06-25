@@ -8,6 +8,8 @@ export interface ErrorLine {
   scope: string
 }
 
+type Errors = NEA.NonEmptyArray<ErrorLine>
+
 export interface ErrorsResponse {
   type: 'Error'
   errors: ReadonlyArray<ErrorLine>

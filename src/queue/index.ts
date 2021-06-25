@@ -5,8 +5,8 @@ import { match } from 'fp-ts/lib/Either'
 import { pipe } from 'fp-ts/lib/function'
 
 import { errorFactory, logger } from '../utils'
-import { ErrorLine } from '../../types'
-import { Errors, processQueueMessage } from './helper'
+import { ErrorLine, Errors } from '../../types'
+import { processQueueMessage } from './helper'
 import { Model } from '../model'
 import { Instant, JobQueue } from '../validators/image'
 

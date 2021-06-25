@@ -1,11 +1,8 @@
 import { Redis } from 'ioredis'
 import * as TE from 'fp-ts/lib/TaskEither'
-import * as NEA from 'fp-ts/lib/NonEmptyArray'
-import { ErrorLine } from '../../types'
+import { ErrorLine, Errors } from '../../types'
 import { Instant, User } from '../validators/image'
 import { errorFactory, key } from '../utils'
-
-type Errors = NEA.NonEmptyArray<ErrorLine>
 
 function zrangeTask(redis: Redis) {
   return (user: User): TE.TaskEither<Array<ErrorLine>, string[]> =>

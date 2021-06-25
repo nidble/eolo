@@ -144,20 +144,20 @@ describe('Image Api [Listing]', () => {
   it('return a list of instants', async () => {
     const stub = [
       {
-        name: '/a/b/32178.jpg',
-        username: 'pluto',
-        latitude: null,
-        longitude: null,
         weight: 683305,
         timestamp: 1624105228293,
-      },
-      {
-        name: '/a/b/32179.jpg',
         username: 'pluto',
         latitude: null,
         longitude: null,
+        name: '/a/b/32178.jpg',
+      },
+      {
         weight: 683305,
         timestamp: 1624105232377,
+        username: 'pluto',
+        latitude: null,
+        longitude: null,
+        name: '/a/b/32179.jpg',
       },
     ]
 

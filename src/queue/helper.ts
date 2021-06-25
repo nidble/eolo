@@ -5,7 +5,7 @@ import { Instant, JobQueue, parseJobQueue } from '../validators/image'
 import * as NEA from 'fp-ts/lib/NonEmptyArray'
 
 import { errorFactory, getImageName, resize } from '../utils'
-import { ErrorLine } from '../../types'
+import { ErrorLine, Errors } from '../../types'
 import { Model } from '../model'
 
 const buildInstant = ({ originalname, username, weight, latitude, longitude, timestamp }: JobQueue): Instant => ({
@@ -31,8 +31,6 @@ const popMessageTask = (
   scope: string,
 ): TE.TaskEither<NEA.NonEmptyArray<ErrorLine>, Record<string, never> | RedisSMQ.QueueMessage> =>
   TE.tryCatch(() => rsmq.popMessageAsync({ qname }), errorFactory(scope))
-
-export type Errors = NEA.NonEmptyArray<ErrorLine>
 
 export const processQueueMessage = (model: Model, rsmq: RedisSMQ, qname: string): TE.TaskEither<Errors, Instant> =>
   pipe(

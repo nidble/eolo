@@ -11,19 +11,20 @@ import { ResponsePayload } from '../../../../types'
 import { Queue } from '../../../queue'
 import { Model } from '../../../model'
 import { File, JobQueue, UserAndGeo } from '../../../domain'
-import { ImagePostValidator, UserValidator } from '../../../domain/validators'
+import { UserAndFileValidator, UserValidator } from '../../../domain/validators'
 import { parseInstant } from '../../../domain/parsers'
 
 const response = <T>(res: Response, payload: ResponsePayload<T>, httpStatus = 200, headers = {}) =>
   T.of(send(res, httpStatus, payload, headers))
 
-function prepareJobQueuePayload({ size, ...parsedReq }: UserAndGeo & File): JobQueue {
-  return { ...parsedReq, weight: size, timestamp: time(), status: 'ACCEPTED' }
+function prepareJobQueuePayload({ user, file }: { user: UserAndGeo; file: File }): JobQueue {
+  const { size: weight, ...image } = file
+  return { ...user, ...image, weight, timestamp: time(), status: 'ACCEPTED' }
 }
 
 export const post = (queue: Queue) => (req: Request, res: Response) =>
   pipe(
-    ImagePostValidator(req),
+    UserAndFileValidator(req),
     E.map(prepareJobQueuePayload),
     TE.fromEither,
     TE.chainFirst(queue.enqueueT),

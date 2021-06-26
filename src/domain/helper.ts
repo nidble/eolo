@@ -1,5 +1,5 @@
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-confusing-arrow */
+/* eslint-disable no-underscore-dangle no-confusing-arrow */
+import * as NEA from 'fp-ts/lib/NonEmptyArray'
 import * as D from 'io-ts/lib/Decoder'
 import * as DE from 'io-ts/lib/DecodeError'
 import { absurd, pipe } from 'fp-ts/lib/function'
@@ -36,18 +36,13 @@ const child = (decodeError: DE.DecodeError<string>): string => {
   return message
 }
 
-export const decodeErrorFormatter = (error: D.DecodeError): Array<string> => {
-  let result: Array<string> = []
+export const decodeErrorFormatter = (error: D.DecodeError): NEA.NonEmptyArray<string> => {
   switch (error._tag) {
     case 'Concat':
-      result = [...result, ...decodeErrorFormatter(error.left)]
-      result = [...result, ...decodeErrorFormatter(error.right)]
-      break
+      return NEA.concat(decodeErrorFormatter(error.left), decodeErrorFormatter(error.right))
     case 'Of':
-      result = [...result, child(error.value)]
-      break
+      return NEA.of(child(error.value))
     default:
-      absurd(error)
+      return absurd(error)
   }
-  return result
 }

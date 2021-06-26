@@ -1,3 +1,6 @@
+/// <reference types="fp-ts"/>
+import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray'
+
 export interface SuccessResponse<T> {
   type: 'Success'
   data: T
@@ -8,7 +11,7 @@ export interface ErrorLine {
   scope: string
 }
 
-type Errors = NEA.NonEmptyArray<ErrorLine>
+type Errors = NonEmptyArray<ErrorLine>
 
 export interface ErrorsResponse {
   type: 'Error'
@@ -16,5 +19,3 @@ export interface ErrorsResponse {
 }
 
 export type ResponsePayload<T> = SuccessResponse<T> | ErrorsResponse
-
-export type Dispatch = (j: Job) => Promise<string>

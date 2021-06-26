@@ -38,7 +38,7 @@ export const polling = (model: Model, rsmq: RedisSMQ, qname: string) => async (d
   }
 }
 
-export function enqueueTask(rsmq: RedisSMQ, qname: string) {
+export function enqueueT(rsmq: RedisSMQ, qname: string) {
   return (job: JobQueue): TE.TaskEither<Errors, string> => {
     const payload = {
       qname,
@@ -51,7 +51,7 @@ export function enqueueTask(rsmq: RedisSMQ, qname: string) {
 
 const queue = (model: Model, rsmq: RedisSMQ, qname: string) =>
   ({
-    enqueueTask: enqueueTask(rsmq, qname),
+    enqueueT: enqueueT(rsmq, qname),
     createQueue: createQueue(rsmq, qname),
     polling: polling(model, rsmq, qname),
   } as const)

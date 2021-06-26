@@ -40,5 +40,5 @@ export const processQueueMessage = (model: Model, rsmq: RedisSMQ, qname: string)
     TE.chain(({ message }) => TE.fromEither(parseJobQueue(message))),
     TE.chainFirst((job) => TE.fromTask(() => resize(job))),
     TE.map(buildInstant),
-    TE.chainFirst((instant) => model.insertByDateTask(instant, '[processMessage]: insertByDate failed')),
+    TE.chainFirst((instant) => model.insertByDateT(instant, '[processMessage]: insertByDate failed')),
   )

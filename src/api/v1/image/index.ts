@@ -26,7 +26,7 @@ export const post = (queue: Queue) => (req: Request, res: Response) =>
     ImagePostValidator(req),
     E.map(prepareJobQueuePayload),
     TE.fromEither,
-    TE.chainFirst(queue.enqueueTask),
+    TE.chainFirst(queue.enqueueT),
     TE.fold(
       (errors) => response(res, { type: 'Error', errors }, 422),
       (job) => response(res, { type: 'Success', data: job }, 202),
@@ -37,7 +37,7 @@ export const index = (model: Model) => (req: Request, res: Response) =>
   pipe(
     UserValidator(req),
     TE.fromEither,
-    TE.chain(model.fetchByDateTask),
+    TE.chain(model.fetchByDateT),
     TE.map(E.traverseArray(parseInstant)),
     T.map(E.flatten),
     TE.fold(

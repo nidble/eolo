@@ -4,12 +4,12 @@ import { ErrorLine, Errors } from '../../types'
 import { errorFactory, key } from '../utils'
 import { Instant, User } from '../domain'
 
-function zrangeTask(redis: Redis) {
+function zrangeT(redis: Redis) {
   return (user: User): TE.TaskEither<Array<ErrorLine>, string[]> =>
     TE.tryCatch(() => redis.zrange(key(user.username), 0, 100), errorFactory('zrange'))
 }
 
-function zaddTask(redis: Redis) {
+function zaddT(redis: Redis) {
   return (instant: Instant, scope: string): TE.TaskEither<Errors, number | string> =>
     TE.tryCatch(
       () => redis.zadd(key(instant.username), instant.timestamp, JSON.stringify(instant)), // <---
@@ -19,8 +19,8 @@ function zaddTask(redis: Redis) {
 
 const model = (redis: Redis) =>
   ({
-    fetchByDateTask: zrangeTask(redis),
-    insertByDateTask: zaddTask(redis),
+    fetchByDateT: zrangeT(redis),
+    insertByDateT: zaddT(redis),
   } as const)
 
 export type Model = ReturnType<typeof model>

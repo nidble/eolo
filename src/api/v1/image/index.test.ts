@@ -19,7 +19,7 @@ describe('Image Api [New]', () => {
   it('return error if no username is specified', async () => {
     const req = { file: {}, body: {} } as unknown as Request
     const res = resMock()
-    const mq = { enqueueTask: jest.fn() } as unknown as Queue
+    const mq = { enqueueT: jest.fn() } as unknown as Queue
     const action = post(mq)
 
     await action(req, res)()
@@ -38,7 +38,7 @@ describe('Image Api [New]', () => {
       body: { username: 'client42' },
     } as unknown as Request
     const res = resMock()
-    const mq = { enqueueTask: jest.fn() } as unknown as Queue
+    const mq = { enqueueT: jest.fn() } as unknown as Queue
     const action = post(mq)
 
     await action(req, res)()
@@ -58,7 +58,7 @@ describe('Image Api [New]', () => {
   it('return error if uploaded file has an invalid mimetype', async () => {
     const req = { file: { ...baseFile, mimetype: '' }, body: { username: 'client42' } } as unknown as Request
     const res = resMock()
-    const mq = { enqueueTask: jest.fn() } as unknown as Queue
+    const mq = { enqueueT: jest.fn() } as unknown as Queue
     const action = post(mq)
 
     await action(req, res)()
@@ -73,7 +73,7 @@ describe('Image Api [New]', () => {
       body: { username: 'client42', longitude: 10, latitude: 32 },
     } as unknown as Request
     const res = resMock()
-    const mq = { enqueueTask: jest.fn(() => () => Promise.resolve('fuffi')) } as unknown as Queue
+    const mq = { enqueueT: jest.fn(() => () => Promise.resolve('fuffi')) } as unknown as Queue
     const action = taskExecutor(post(mq))
 
     await action(req, res)
@@ -92,7 +92,7 @@ describe('Image Api [New]', () => {
     }
     const payload = { type: 'Success', data }
     expect(res.end).toHaveBeenCalledWith(JSON.stringify(payload))
-    expect(mq.enqueueTask).toHaveBeenCalledWith(data)
+    expect(mq.enqueueT).toHaveBeenCalledWith(data)
   })
 
   it('manage broken field like longitude and latitude', async () => {
@@ -101,7 +101,7 @@ describe('Image Api [New]', () => {
       body: { username: 'client42', longitude: 'BROKEN_FIELD' },
     } as unknown as Request
     const res = resMock()
-    const mq = { enqueueTask: jest.fn(() => () => Promise.resolve('fuffi')) } as unknown as Queue
+    const mq = { enqueueT: jest.fn(() => () => Promise.resolve('fuffi')) } as unknown as Queue
     const action = taskExecutor(post(mq))
 
     await action(req, res)
@@ -120,7 +120,7 @@ describe('Image Api [New]', () => {
     }
     const payload = { type: 'Success', data }
     expect(res.end).toHaveBeenCalledWith(JSON.stringify(payload))
-    expect(mq.enqueueTask).toHaveBeenCalledWith(data)
+    expect(mq.enqueueT).toHaveBeenCalledWith(data)
   })
 })
 

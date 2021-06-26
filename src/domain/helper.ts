@@ -1,4 +1,5 @@
 /* eslint-disable no-underscore-dangle */
+/* eslint-disable no-confusing-arrow */
 import * as D from 'io-ts/lib/Decoder'
 import * as DE from 'io-ts/lib/DecodeError'
 import { absurd, pipe } from 'fp-ts/lib/function'
@@ -16,6 +17,10 @@ export const NoEmpty: D.Decoder<unknown, NoEmpty> = pipe(
 export const OptionalNumber: D.Decoder<unknown, number | null> = {
   decode: (u?) => (typeof u === 'number' ? D.success(u) : D.success(Number(u) || null)),
 }
+
+const ALLOWED_MIMETYPES = ['image/jpeg']
+export const mimetypes = (u: string) =>
+  ALLOWED_MIMETYPES.includes(u) ? D.success(u) : D.failure(u, ALLOWED_MIMETYPES.join(';'))
 
 const child = (decodeError: DE.DecodeError<string>): string => {
   let message = ''

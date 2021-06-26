@@ -1,8 +1,8 @@
 import { Redis } from 'ioredis'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { ErrorLine, Errors } from '../../types'
-import { Instant, User } from '../validators/image'
 import { errorFactory, key } from '../utils'
+import { Instant, User } from '../domain'
 
 function zrangeTask(redis: Redis) {
   return (user: User): TE.TaskEither<Array<ErrorLine>, string[]> =>

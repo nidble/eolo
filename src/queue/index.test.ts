@@ -2,7 +2,7 @@ import RedisSMQ from 'rsmq'
 import { Redis } from 'ioredis'
 import queue, { enqueueTask, createQueue, polling } from '.'
 import model from '../model'
-import { JobQueue } from '../validators/image'
+import { JobQueue } from '../domain'
 
 const qname = '42'
 

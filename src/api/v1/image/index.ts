@@ -1,3 +1,4 @@
+import { Request, Response } from 'express'
 import send from '@polka/send-type'
 import * as E from 'fp-ts/lib/Either'
 import * as TE from 'fp-ts/lib/TaskEither'
@@ -5,13 +6,13 @@ import * as T from 'fp-ts/lib/Task'
 import { pipe } from 'fp-ts/lib/function'
 
 import { time } from '../../../utils'
-import { Request, Response } from 'express'
 import { ResponsePayload } from '../../../../types'
 
-import { ImagePostValidator, UserAndGeo, UserValidator, parseInstant, JobQueue } from '../../../validators/image'
-import { File } from '../../../validators/file'
 import { Queue } from '../../../queue'
 import { Model } from '../../../model'
+import { File, JobQueue, UserAndGeo } from '../../../domain'
+import { ImagePostValidator, UserValidator } from '../../../domain/validators'
+import { parseInstant } from '../../../domain/parsers'
 
 const response = <T>(res: Response, payload: ResponsePayload<T>, httpStatus = 200, headers = {}) =>
   T.of(send(res, httpStatus, payload, headers))

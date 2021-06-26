@@ -1,15 +1,15 @@
 import crypto from 'crypto'
-
 import fs from 'fs/promises'
 import sharp from 'sharp'
 import pino from 'pino'
-import { LOG_LEVEL, REDIS_PREFIX, UPLOADS_FOLDER } from '../config'
-import { ErrorLine } from '../../types'
 import { Request, Response } from 'express'
 import { Task } from 'fp-ts/lib/Task'
 import { toError } from 'fp-ts/lib/Either'
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray'
-import { JobQueue } from '../validators/image'
+
+import { JobQueue } from '../domain'
+import { LOG_LEVEL, REDIS_PREFIX, UPLOADS_FOLDER } from '../config'
+import { ErrorLine } from '../../types'
 
 export const logger = pino({ level: LOG_LEVEL })
 

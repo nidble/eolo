@@ -5,11 +5,10 @@ import pino from 'pino'
 import { Request, Response } from 'express'
 import { Task } from 'fp-ts/lib/Task'
 import { toError } from 'fp-ts/lib/Either'
-import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray'
 
 import { JobQueue } from '../domain'
 import { LOG_LEVEL, REDIS_PREFIX, UPLOADS_FOLDER } from '../config'
-import { ErrorLine } from '../../types'
+import { Errors } from '../../types'
 
 export const logger = pino({ level: LOG_LEVEL })
 
@@ -47,5 +46,5 @@ export function taskExecutor(task: (req: Request, res: Response) => Task<void>) 
 }
 
 export function errorFactory(scope: string) {
-  return (cause: unknown): NonEmptyArray<ErrorLine> => [{ message: toError(cause).message, scope }]
+  return (cause: unknown): Errors => [{ message: toError(cause).message, scope }]
 }

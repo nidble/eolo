@@ -1,11 +1,11 @@
 import { Redis } from 'ioredis'
 import * as TE from 'fp-ts/lib/TaskEither'
-import { ErrorLine, Errors } from '../../types'
+import { Errors } from '../../types'
 import { errorFactory, key } from '../utils'
 import { Instant, User } from '../domain'
 
 function zrangeT(redis: Redis) {
-  return (user: User): TE.TaskEither<Array<ErrorLine>, string[]> =>
+  return (user: User): TE.TaskEither<Errors, string[]> =>
     TE.tryCatch(() => redis.zrange(key(user.username), 0, 100), errorFactory('zrange'))
 }
 

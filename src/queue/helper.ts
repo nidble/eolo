@@ -4,7 +4,7 @@ import { pipe } from 'fp-ts/lib/function'
 import * as NEA from 'fp-ts/lib/NonEmptyArray'
 
 import { errorFactory, getImageName, resize } from '../utils'
-import { ErrorLine, Errors } from '../../types'
+import { Errors } from '../../types'
 import { Model } from '../model'
 import { Instant, JobQueue } from '../domain'
 import { parseJobQueue } from '../domain/parsers'
@@ -30,7 +30,7 @@ const popMessageTask = (
   rsmq: RedisSMQ,
   qname: string,
   scope: string,
-): TE.TaskEither<NEA.NonEmptyArray<ErrorLine>, Record<string, never> | RedisSMQ.QueueMessage> =>
+): TE.TaskEither<Errors, Record<string, never> | RedisSMQ.QueueMessage> =>
   TE.tryCatch(() => rsmq.popMessageAsync({ qname }), errorFactory(scope))
 
 export const processQueueMessage = (model: Model, rsmq: RedisSMQ, qname: string): TE.TaskEither<Errors, Instant> =>

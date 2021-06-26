@@ -1,4 +1,4 @@
-export interface SuccessPayload<T> {
+export interface SuccessResponse<T> {
   type: 'Success'
   data: T
 }
@@ -15,6 +15,6 @@ export interface ErrorsResponse {
   errors: ReadonlyArray<ErrorLine>
 }
 
-export type ResponsePayload<T> = SuccessPayload<T> | ErrorsResponse
+export type ResponsePayload<T> = SuccessResponse<T> | ErrorsResponse
 
 export type Dispatch = (j: Job) => Promise<string>

@@ -6,7 +6,7 @@ module.exports = {
     "^.+\\.(ts|tsx)$": "ts-jest",
   },
   coverageDirectory: 'coverage',
-  modulePathIgnorePatterns: ['<rootDir>/dist/', '<rootDir>/src/server.ts'],
+  modulePathIgnorePatterns: ['<rootDir>/dist/', '<rootDir>/src/server.ts', '<rootDir>/src/worker.ts'],
   verbose: true,
   coverageReporters: ['html'],
   collectCoverageFrom: [

@@ -1,4 +1,5 @@
-/// <reference types="fp-ts"/>
+// eslint-disable-next-line spaced-comment
+/// <reference types="fp-ts" />
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray'
 
 export interface SuccessResponse<T> {

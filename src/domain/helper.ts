@@ -1,4 +1,5 @@
-/* eslint-disable no-underscore-dangle no-confusing-arrow */
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable no-confusing-arrow */
 import * as NEA from 'fp-ts/lib/NonEmptyArray'
 import * as D from 'io-ts/lib/Decoder'
 import * as DE from 'io-ts/lib/DecodeError'

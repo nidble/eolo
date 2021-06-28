@@ -2,7 +2,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/33b2fa9196944d38a9fcbc74455895aa)](https://www.codacy.com/gh/nidble/eolo/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nidble/eolo&amp;utm_campaign=Badge_Grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/33b2fa9196944d38a9fcbc74455895aa)](https://www.codacy.com/gh/nidble/eolo/dashboard?utm_source=github.com&utm_medium=referral&utm_content=nidble/eolo&utm_campaign=Badge_Coverage)
 
-Eolo is a RESTful app that can accept and manipulate images upoload from the user. The manipulation is defered thanks to a queue, lastly a feed provide a list of all images available for every user. Eolo embraces twelve factors, cutting edge performances and functional programming.
+Eolo is a RESTful app that can accept and manipulate images uploaded by the user. The manipulation is deferred thanks to a queue. Lastly, a feed provides a list of all images available for every user. Eolo embraces twelve factors, cutting-edge performances, and functional programming.
 
 - Full stricted Typescript code
 - Fine granular configuration of Eslint, Prettier and Tsc

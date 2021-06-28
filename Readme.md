@@ -1,15 +1,20 @@
 # Eolo
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/33b2fa9196944d38a9fcbc74455895aa)](https://www.codacy.com/gh/nidble/eolo/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nidble/eolo&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/33b2fa9196944d38a9fcbc74455895aa)](https://www.codacy.com/gh/nidble/eolo/dashboard?utm_source=github.com&utm_medium=referral&utm_content=nidble/eolo&utm_campaign=Badge_Coverage)
 
-Eolo is a RESTful app capable to perform image manipulation embracing twelve factors and cutting edge performances
+Eolo is a RESTful app that can accept and manipulate images upoload from the user. The manipulation is defered thanks to a queue, lastly a feed provide a list of all images available for every user. Eolo embraces twelve factors, cutting edge performances and functional programming.
 
 - Full stricted Typescript code
 - Fine granular configuration of Eslint, Prettier and Tsc
+- Domain Driven Development throught _Decoder_ and _Parsers_
 
 ## Tech
 
 Eolo uses a number of open source projects to work properly:
 
 - [PolkaJS] - A micro web server so fast, it'll make you dance! 👯
+- [FP-TS] - Functional programming in TypeScript 
+- [IO-TS] - Runtime type system for IO decoding/encoding 
 - [Sharp] - High performance Node.js image processing, the fastest module to resize JPEG, PNG, WebP, AVIF and TIFF images. 
 - [Node.js] - evented I/O for the backend
 - [Redis] - Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache, and message broker.
@@ -126,4 +131,6 @@ npx static-server
    [Sharp]: <https://www.npmjs.com/package/sharp>
    [Redis]: <https://redis.io/download>
    [node.js]: <http://nodejs.org>
-   [Pino]: <https://github.com/pinojs/pino/issues>
+   [Pino]: <https://github.com/pinojs/pino>
+   [FP-TS]: <https://github.com/gcanti/fp-ts>
+   [IO-TS]: <https://github.com/gcanti/io-ts>

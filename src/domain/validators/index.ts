@@ -26,13 +26,3 @@ export const UserValidator = (req: Request): E.Either<Errors, _.User> =>
 export const UserAndFileValidator = (req: Request): E.Either<Errors, { user: _.UserAndGeo; file: _.File }> =>
   pipe(UserGeoValidator(req), E.bindTo('user'), E.apS('file', FileValidator(req)))
 
-// export const UserAndImageValidator = (req: Request): E.Either<Errors, _.UserAndGeo & _.File> =>
-//   pipe(
-//     UserGeoValidator(req),
-//     E.chain((body) =>
-//       pipe(
-//         FileValidator(req),
-//         E.map((file) => ({ ...body, ...file })),
-//       ),
-//     ),
-//   )

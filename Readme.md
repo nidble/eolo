@@ -4,6 +4,7 @@
 
 Eolo is a RESTful app that can accept and manipulate images uploaded by the user. The manipulation is deferred thanks to a queue. Lastly, a feed provides a list of all images available for every user. Eolo embraces twelve factors, cutting-edge performances, and functional programming.
 
+- With ESM module support and `experimental-specifier-resolution=node`
 - Full stricted Typescript code
 - Fine granular configuration of Eslint, Prettier and Tsc
 - Domain Driven Development throught _Decoder_ and _Parsers_

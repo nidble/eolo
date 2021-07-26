@@ -17,7 +17,10 @@ const q = queue(m, rsmq, QNAME)
 
 app.use(logger, json, cors)
 
-app.get('healthz', (_req, res) => res.end())
+app.get('healthz', async (_req, res) => {
+  await redis.ping() // or db.execute("SELECT 1")
+  res.end()
+})
 
 app.get('/api/v1/image/:username', taskExecutor(image.index(m)))
 

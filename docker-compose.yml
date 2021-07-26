@@ -9,6 +9,8 @@ x-app: &default-app
   - REDIS_PASSWORD=${REDIS_PASSWORD}
   volumes:
     - ${PWD}/${UPLOADS_FOLDER}:/app/${UPLOADS_FOLDER}
+  stop_grace_period: "3s"
+  tty: true
   depends_on:
     - redis
 
@@ -17,7 +19,18 @@ services:
     <<: *default-app
     ports:
       - "${NODE_PORT}:${NODE_PORT}"
-    restart: always
+    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+    healthcheck:
+      test: "${DOCKER_WEB_HEALTHCHECK_TEST:-curl localhost:${NODE_PORT}/healthz}"
+      interval: "60s"
+      timeout: "3s"
+      start_period: "5s"
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "${DOCKER_SERVER_CPUS:-0}"
+          memory: "${DOCKER_SERVER_MEMORY:-0}"
 
   eolo_worker:
     <<: *default-app

@@ -21,13 +21,7 @@ export const cors: polka.Middleware = (req, res, next) => {
   res.setHeader('Access-Control-Request-Method', '*')
   res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT')
   res.setHeader('Access-Control-Allow-Headers', '*')
-  if (req.method === 'OPTIONS') {
-    res.writeHead(200)
-    res.end()
-    return
-  }
-
-  next()
+  req.method === 'OPTIONS' ? res.writeHead(200).end() : next()
 }
 
 /**
@@ -39,16 +33,10 @@ export const cors: polka.Middleware = (req, res, next) => {
 export const json = bodyParser.json()
 
 /**
- * Middleware to proxy Multer, to gracefully return 500 instead to stop server execution
+ * Middleware to proxy Multer: gracefully return 500 instead to stop server execution
  * @param req
  * @param res
  * @param next
  */
-export const uploader: polka.Middleware = (req, res, next) => {
-  upload.single('image')(req, res, (err) => {
-    if (err) {
-      return next(err.message)
-    }
-    next()
-  })
-}
+export const uploader: polka.Middleware = (req, res, next) =>
+  upload.single('image')(req, res, (err) => (err ? next(err.message) : next()))

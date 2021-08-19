@@ -14,10 +14,10 @@ const fromDecodeError = (s: string): ((es: DecodeError) => Errors) => {
   return flow(decodeErrorFormatter, NEA.bindTo('message'), NEA.bind('scope', scope))
 }
 
-export const FileValidator = (req: Request): E.Either<Errors, _.File> =>
+const FileValidator = (req: Request): E.Either<Errors, _.File> =>
   pipe(_.FileDecoder.decode(req.file), E.mapLeft(fromDecodeError('image')))
 
-export const UserGeoValidator = (req: Request): E.Either<Errors, _.UserAndGeo> =>
+const UserGeoValidator = (req: Request): E.Either<Errors, _.UserAndGeo> =>
   pipe(_.UserAndGeoDecoder.decode(req.body), E.mapLeft(fromDecodeError('username')))
 
 export const UserValidator = (req: Request): E.Either<Errors, _.User> =>
@@ -25,4 +25,3 @@ export const UserValidator = (req: Request): E.Either<Errors, _.User> =>
 
 export const UserAndFileValidator = (req: Request): E.Either<Errors, { user: _.UserAndGeo; file: _.File }> =>
   pipe(UserGeoValidator(req), E.bindTo('user'), E.apS('file', FileValidator(req)))
-

@@ -2,13 +2,14 @@ import crypto from 'crypto'
 import fs from 'fs/promises'
 import sharp from 'sharp'
 import pino from 'pino'
-import { Request, Response } from 'express'
-import { Task } from 'fp-ts/lib/Task'
+import { Response } from 'express'
+import { of } from 'fp-ts/lib/Task'
 import { toError } from 'fp-ts/lib/Either'
+import send from '@polka/send-type'
 
 import { JobQueue } from '../domain'
 import { LOG_LEVEL, REDIS_PREFIX, UPLOADS_FOLDER } from '../config'
-import { Errors } from '../../types'
+import { Errors, ResponsePayload } from '../../types'
 
 export const logger = pino({ level: LOG_LEVEL })
 
@@ -41,10 +42,13 @@ export const key = (username: string) => `${REDIS_PREFIX}:instant:${md5(username
 
 export const getImageName = (originalname: string) => `${dir}/${originalname}`
 
-export function taskExecutor(task: (req: Request, res: Response) => Task<void>) {
-  return (req: Request, res: Response) => task(req, res)()
-}
+// export function taskExecutor(task: (req: Request, res: Response) => Task<void>) {
+//   return (req: Request, res: Response) => task(req, res)()
+// }
 
 export function errorFactory(scope: string) {
   return (cause: unknown): Errors => [{ message: toError(cause).message, scope }]
 }
+
+export const response = <T>(res: Response, payload: ResponsePayload<T>, httpStatus = 200, headers = {}) =>
+  of(send(res, httpStatus, payload, headers))

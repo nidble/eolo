@@ -24,7 +24,7 @@ export const createQueue = (rsmq: RedisSMQ, qname: string) => async () => {
 
 export const polling = (model: Model, rsmq: RedisSMQ, qname: string) => async (delay: number, cap: number) => {
   const i = 0
-  for await (const startTimeIgnored of setInterval(delay, Date.now())) {
+  for await (const startTimeIgnored of setInterval(delay, Date.now())) { // lgtm [js/unused-loop-variable, js/unused-local-variable] 
     pipe(
       await processQueueMessage(model, rsmq, qname)(),
       match(

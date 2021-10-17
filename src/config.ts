@@ -1,7 +1,7 @@
-import { Level } from 'pino'
+import pino from 'pino'
 
 export const PORT = process.env.NODE_PORT || 3030
-export const LOG_LEVEL: Level = (process.env.LOG_LEVEL as Level) || 'info'
+export const LOG_LEVEL: pino.Level = (process.env.LOG_LEVEL as pino.Level) || 'info'
 
 export const REDIS_PREFIX = process.env.REDIS_PREFIX || 'prefix'
 export const REDIS_PORT = Number(process.env.REDIS_PORT) || 6379

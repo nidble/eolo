@@ -1,6 +1,5 @@
 *
 .env
-src/local
 !src/
 !jest.config.cjs
 !tests/

@@ -23,7 +23,7 @@
     "@types/jest": "^26.0.23",
     "@types/multer": "^1.4.5",
     "@types/node": "^15.12.2",
-    "@types/pino-http": "^5.4.1",
+    "@types/pino-http": "^5.8.0",
     "@types/polka": "^0.5.2",
     "@types/sharp": "^0.28.3",
     "@types/supertest": "^2.0.11",
@@ -51,7 +51,8 @@
     "ioredis": "^4.27.6",
     "multer": "^1.4.2",
     "nanoid": "^3.1.23",
-    "pino-http": "^5.5.0",
+    "pino-http": "^5.8.0",
+    "pino": "^7.0.2",
     "polka": "^0.5.2",
     "rsmq": "^0.12.4",
     "sharp": "^0.28.3"

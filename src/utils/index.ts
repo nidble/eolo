@@ -34,6 +34,7 @@ export const createFolder = async () => {
   }
 }
 
+// eslint-disable-next-line max-len
 export const md5 = (s: string) => crypto.createHash('md5').update(s).digest('hex') // lgtm [js/weak-cryptographic-algorithm]
 
 export const time = () => +new Date()

@@ -55,7 +55,7 @@ LOG_LEVEL=info  NODE_ENV=production yarn worker
 
 In case of errors ie: `ECONNREFUSED`, etc. Please consider to properly tweak the following Env's variables.
 
-## ENVriomental variables
+## Enviromental variables
 
 What follows is a table of principal variables and some examples
 

@@ -10,7 +10,7 @@ FROM node:16.3-alpine AS builder
 WORKDIR /usr/src/app
 
 # Copy conf files
-COPY --chown=node:node package*.json jest.config.cjs tsconfig.json ./
+COPY --chown=node:node package*.json jest.config.cjs tsconfig-base.json ./
 
 # Install all dependecies, perform tests and generate Js files
 RUN npm install --no-optional --quiet

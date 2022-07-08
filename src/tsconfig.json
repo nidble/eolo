@@ -2,6 +2,7 @@
     "extends": "../tsconfig-base.json",
     "compilerOptions": {
         // allow src to be "referenced" from the outside by declaring it as "composite":
-        "composite": true
+        "composite": true,
+        "outDir": "../dist"
     }
 }

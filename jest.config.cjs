@@ -22,4 +22,9 @@ module.exports = {
       statements: 0,
     },
   },
+  globals: {
+    "ts-jest": {
+      tsconfig: "tsconfig-base.json",
+    },
+  },
 };

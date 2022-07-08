@@ -1,7 +1,10 @@
 // the contents of /{src|test}/tsconfig.json
 {
     "extends": "../tsconfig-base.json",
+    "compilerOptions": {
+    },
     "references": [
         { "path": "../src" }
-    ]
+    ],
+    "exclude": ["../dist", "node_modules"]
 }

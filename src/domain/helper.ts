@@ -5,7 +5,7 @@ import * as D from 'io-ts/lib/Decoder'
 import * as DE from 'io-ts/lib/DecodeError'
 import { absurd, pipe } from 'fp-ts/lib/function'
 
-interface NoEmptyBrand {
+export interface NoEmptyBrand {
   readonly NoEmpty: unique symbol
 }
 type NoEmpty = string & NoEmptyBrand

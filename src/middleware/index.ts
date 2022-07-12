@@ -1,7 +1,7 @@
 import polka from 'polka'
 import bodyParser from 'body-parser'
 import pino from 'pino-http'
-import { LOG_LEVEL, UPLOADS_FOLDER } from '../config'
+import { LOG_LEVEL, UPLOADS_FOLDER } from '@eolo/config'
 import multer from 'multer'
 
 const upload = multer({ dest: UPLOADS_FOLDER })

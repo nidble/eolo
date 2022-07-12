@@ -4,11 +4,11 @@ import * as TE from 'fp-ts/lib/TaskEither'
 import { match, toError } from 'fp-ts/lib/Either'
 import { pipe } from 'fp-ts/lib/function'
 
-import { errorFactory, logger } from '../utils'
-import { Errors } from '../../types'
+import { errorFactory, logger } from '@eolo/utils'
+import { Errors } from '@eolo-types/index'
 import { processQueueMessage } from './helper'
-import { Model } from '../model'
-import { Instant, JobQueue } from '../domain'
+import { Model } from '@eolo/model'
+import { Instant, JobQueue } from '@eolo/domain'
 
 export const createQueue = (rsmq: RedisSMQ, qname: string) => async () => {
   try {

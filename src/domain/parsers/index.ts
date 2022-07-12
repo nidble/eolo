@@ -3,9 +3,9 @@ import { flow, pipe } from 'fp-ts/lib/function'
 import * as E from 'fp-ts/lib/Either'
 import * as J from 'fp-ts/lib/Json'
 
-import { Errors } from '../../../types'
-import { decodeErrorFormatter } from './../helper'
-import { errorFactory } from '../../utils'
+import { Errors } from '@eolo-types/index'
+import { decodeErrorFormatter } from '@eolo/domain/helper'
+import { errorFactory } from '@eolo/utils'
 import * as _ from '..'
 
 export const JsonParserGeneric = <A, T extends D.Decoder<unknown, A>>(decoder: T, input: string, scope: string) =>

@@ -1,8 +1,8 @@
 import RedisSMQ from 'rsmq'
 import { Redis } from 'ioredis'
 import queue, { enqueueT, createQueue, polling } from '.'
-import model from '../model'
-import { JobQueue } from '../domain'
+import model from '@eolo/model'
+import { JobQueue } from '@eolo/domain'
 
 const qname = '42'
 

@@ -4,14 +4,14 @@ import * as TE from 'fp-ts/lib/TaskEither'
 import * as T from 'fp-ts/lib/Task'
 import { pipe } from 'fp-ts/lib/function'
 
-import { time } from '../../../utils'
-import { ErrorsResponse, SuccessResponse } from '../../../../types'
+import { time } from '@eolo/utils'
+import { ErrorsResponse, SuccessResponse } from '@eolo-types/index'
 
-import { Queue } from '../../../queue'
-import { Model } from '../../../model'
-import { File, Instant, JobQueue, UserAndGeo } from '../../../domain'
-import { UserAndFileValidator, UserValidator } from '../../../domain/validators'
-import { parseInstant } from '../../../domain/parsers'
+import { Queue } from '@eolo/queue'
+import { Model } from '@eolo/model'
+import { File, Instant, JobQueue, UserAndGeo } from '@eolo/domain'
+import { UserAndFileValidator, UserValidator } from '@eolo/domain/validators'
+import { parseInstant } from '@eolo/domain/parsers'
 
 function prepareJobQueuePayload({ user, file }: { user: UserAndGeo; file: File }): JobQueue {
   const { size: weight, ...image } = file

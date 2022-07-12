@@ -1,8 +1,8 @@
 import { Redis } from 'ioredis'
 import * as TE from 'fp-ts/lib/TaskEither'
-import { Errors } from '../../types'
-import { errorFactory, key } from '../utils'
-import { Instant, User } from '../domain'
+import { Errors } from '@eolo-types/index'
+import { errorFactory, key } from '@eolo/utils'
+import { Instant, User } from '@eolo/domain'
 
 function zrangeT(redis: Redis) {
   return (user: User): TE.TaskEither<Errors, string[]> =>

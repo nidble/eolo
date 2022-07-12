@@ -3,11 +3,11 @@ import * as TE from 'fp-ts/lib/TaskEither'
 import { pipe } from 'fp-ts/lib/function'
 import * as NEA from 'fp-ts/lib/NonEmptyArray'
 
-import { errorFactory, getImageName, resize } from '../utils'
-import { Errors } from '../../types'
-import { Model } from '../model'
-import { Instant, JobQueue } from '../domain'
-import { parseJobQueue } from '../domain/parsers'
+import { errorFactory, getImageName, resize } from '@eolo/utils'
+import { Errors } from '@eolo-types/index'
+import { Model } from '@eolo/model'
+import { Instant, JobQueue } from '@eolo/domain'
+import { parseJobQueue } from '@eolo/domain/parsers'
 
 const buildInstant = ({ originalname, username, weight, latitude, longitude, timestamp }: JobQueue): Instant => ({
   name: getImageName(originalname),

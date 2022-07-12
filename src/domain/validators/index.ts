@@ -5,7 +5,7 @@ import * as E from 'fp-ts/lib/Either'
 import * as NEA from 'fp-ts/lib/NonEmptyArray'
 import { DecodeError } from 'io-ts/lib/Decoder'
 
-import { Errors } from '../../../types'
+import { Errors } from '@eolo-types/index'
 import { decodeErrorFormatter } from '../helper'
 import * as _ from '..'
 

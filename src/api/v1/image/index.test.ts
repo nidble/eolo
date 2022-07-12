@@ -2,12 +2,12 @@
 import { Request } from 'express'
 import { Redis } from 'ioredis'
 import { saveJob, getInstantsByDate } from '.'
-import model from '../../../model'
-import { Queue } from '../../../queue'
+import model from '@eolo/model'
+import { Queue } from '@eolo/queue'
 import { left, right } from 'fp-ts/Either'
 
-jest.mock('../../../utils', () => ({
-  ...jest.requireActual('../../../utils'),
+jest.mock('@eolo/utils', () => ({
+  ...jest.requireActual('@eolo/utils'),
   time: () => 1234567890,
 }))
 

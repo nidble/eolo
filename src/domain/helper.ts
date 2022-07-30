@@ -1,5 +1,3 @@
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-confusing-arrow */
 import * as NEA from 'fp-ts/lib/NonEmptyArray'
 import * as D from 'io-ts/lib/Decoder'
 import * as DE from 'io-ts/lib/DecodeError'
@@ -24,23 +22,20 @@ export const mimetypes = (u: string) =>
   ALLOWED_MIMETYPES.includes(u) ? D.success(u) : D.failure(u, ALLOWED_MIMETYPES.join(';'))
 
 const child = (decodeError: DE.DecodeError<string>): string => {
-  let message = ''
   switch (decodeError._tag) {
     case 'Leaf':
-      message = `as '${decodeError.actual}' is not valid, should be ${decodeError.error}`
-      break
+      return `as '${decodeError.actual}' is not valid, should be ${decodeError.error}`
     case 'Key':
-      message = `${decodeError.kind} property '${decodeError.key}' ${decodeErrorFormatter(decodeError.errors)}`
-      break
+      return `${decodeError.kind} property '${decodeError.key}' ${decodeErrorFormatter(decodeError.errors)}`
+    default:
+      return ''
   }
-
-  return message
 }
 
 export const decodeErrorFormatter = (error: D.DecodeError): NEA.NonEmptyArray<string> => {
   switch (error._tag) {
     case 'Concat':
-      return NEA.concat(decodeErrorFormatter(error.left), decodeErrorFormatter(error.right))
+      return NEA.concat(decodeErrorFormatter(error.right))(decodeErrorFormatter(error.left))
     case 'Of':
       return NEA.of(child(error.value))
     default:

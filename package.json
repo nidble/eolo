@@ -5,9 +5,9 @@
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "build": "tsc --build src",
-    "start": "tsc && node -r dotenv/config --experimental-specifier-resolution=node ./dist/server.js",
-    "worker": "tsc && node -r dotenv/config --experimental-specifier-resolution=node ./dist/worker.js",
+    "build": "tsc --build src && tsc-alias -p src/tsconfig.json",
+    "start": "npm run build && node -r dotenv/config --experimental-specifier-resolution=node ./dist/server.js",
+    "worker": "npm run build && node -r dotenv/config --experimental-specifier-resolution=node ./dist/worker.js",
     "lint": "eslint \"*/**/*.ts\" --quiet --fix",
     "format": "prettier --config .prettierrc \"./src/**/*.ts\" --write",
     "test": "jest",
@@ -40,6 +40,7 @@
     "supertest": "^6.2.4",
     "ts-jest": "^28.0.5",
     "ts-node": "^10.8.2",
+    "tsc-alias": "^1.6.11",
     "typescript": "^4.7.4"
   },
   "dependencies": {

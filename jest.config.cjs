@@ -27,4 +27,8 @@ module.exports = {
       tsconfig: "tsconfig-base.json",
     },
   },
+  moduleNameMapper: {
+    "@eolo/(.*)": "<rootDir>/src/$1",
+    "@eolo-types/(.*)": "<rootDir>/types/$1"
+  },
 };

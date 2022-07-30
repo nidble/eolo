@@ -50,11 +50,11 @@ services:
     volumes:
       # save redisearch data to your current working directory
       - ./redis-data:/data
-    command:
-      # Save if 100 keys are added in every 10 seconds
-      - "--save 10 100"
-      # Set password
-      - "--requirepass ${REDIS_PASSWORD}"
+    # command:
+    #   # Save if 100 keys are added in every 10 seconds
+    #   - "--save 10 100"
+    #   # Set password
+    #   - "--requirepass ${REDIS_PASSWORD}"
 
 volumes:
   redis-data:

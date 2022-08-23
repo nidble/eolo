@@ -1,3 +1,6 @@
+// const { pathsToModuleNameMapper } = require('ts-jest');
+// const { compilerOptions } = require('./tsconfig-base');
+
 module.exports = {
   preset: 'ts-jest',
   testMatch: [ "**/__tests__/**/*.ts", "**/?(*.)+(spec|test).ts", "**/tests/**/*.ts"],
@@ -31,4 +34,6 @@ module.exports = {
     "@eolo/(.*)": "<rootDir>/src/$1",
     "@eolo-types/(.*)": "<rootDir>/types/$1"
   },
+  // This doesn't work because require('./tsconfig-base') doesn't recognize comments in JSON files
+  // moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths , { prefix: '<rootDir>/' } ),
 };

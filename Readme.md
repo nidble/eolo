@@ -21,7 +21,7 @@ Eolo uses a number of open source projects to work properly:
 - [Redis] - Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache, and message broker.
 - [Pino] - 🌲 super fast, all natural json logger 🌲
 
-And of course Eolo itself is open source with a [public repository][eolo] on GitHub.
+And of course Eolo is itself open source with a [public repository][eolo] on GitHub.
 
 ## Installation
 
